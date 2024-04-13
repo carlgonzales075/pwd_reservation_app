@@ -1,0 +1,71 @@
+class User {
+  final String firstName;
+  final String lastName;
+  final String? description;
+  final String? avatar;
+  final String? email;
+
+  const User({
+    required this.firstName,
+    required this.lastName,
+    this.description,
+    this.avatar,
+    this.email
+  });
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    final data = json['data'] as Map<String, dynamic>?;
+
+    if (data != null) {
+      final firstName = data['first_name'] as String?;
+      final lastName = data['last_name'] as String?;
+      final description = data['description'] as String?;
+      final avatar = data['avatar'] as String?;
+      final email = data['email'] as String?;
+
+      if (firstName != null && lastName != null) {
+        return User(
+          firstName: firstName,
+          lastName: lastName,
+          description: description,
+          avatar: avatar,
+          email: email
+        );
+      }
+    }
+  
+   throw const FormatException('Failed to load credentials.');
+  }
+}
+
+class Credentials {
+  final String accessToken;
+  final int expires;
+  final String refreshToken;
+
+  const Credentials({
+    required this.accessToken,
+    required this.expires,
+    required this.refreshToken
+  });
+
+  factory Credentials.fromJson(Map<String, dynamic> json) {
+    final data = json['data'] as Map<String, dynamic>?;
+
+    if (data != null) {
+      final accessToken = data['access_token'] as String?;
+      final expires = data['expires'] as int?;
+      final refreshToken = data['refresh_token'] as String?;
+
+      if (accessToken != null && expires != null && refreshToken != null) {
+        return Credentials(
+          accessToken: accessToken,
+          expires: expires,
+          refreshToken: refreshToken,
+        );
+      }
+    }
+  
+  throw const FormatException('Failed to load credentials.');
+  }
+}
