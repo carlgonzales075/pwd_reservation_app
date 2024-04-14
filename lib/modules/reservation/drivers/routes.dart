@@ -11,8 +11,8 @@ class StopsProvider extends ChangeNotifier {
   int? pickUpIndex;
 
   void updateDestination({
-    required String stopNameDestination,
-    required int destinationIndex
+    required String? stopNameDestination,
+    required int? destinationIndex
   }) {
     this.stopNameDestination = stopNameDestination;
     this.destinationIndex = destinationIndex;
@@ -20,8 +20,8 @@ class StopsProvider extends ChangeNotifier {
   }
 
   void updatePickUp({
-    required String stopNamePickUp,
-    required int pickUpIndex
+    required String? stopNamePickUp,
+    required int? pickUpIndex
   }) {
     this.stopNamePickUp = stopNamePickUp;
     this.pickUpIndex = pickUpIndex;

@@ -4,6 +4,7 @@ import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
 import 'package:pwd_reservation_app/modules/reservation/drivers/routes.dart';
 import 'package:provider/provider.dart';
 import 'package:pwd_reservation_app/modules/reservation/select_bus.dart';
+// import 'package:pwd_reservation_app/modules/shared/widgets/widgets_module.dart';
 
 class ReservationScreen extends StatelessWidget {
   const ReservationScreen({super.key});
@@ -66,16 +67,30 @@ class _StopsListView extends State<StopsListView> {
                         return GestureDetector(
                           onTap: () {
                             setState(() {
-                              if (stops.destinationIndex == null) {
+                              if (stops.destinationIndex == index) {
                                 stops.updateDestination(
-                                  stopNameDestination: data[index].stopName ?? '',
-                                  destinationIndex: index
+                                  stopNameDestination: null,
+                                  destinationIndex: null
+                                );
+                              } else if (stops.pickUpIndex == index) {
+                                stops.updatePickUp(
+                                  stopNamePickUp: null,
+                                  pickUpIndex: null
                                 );
                               } else {
-                                stops.updatePickUp(
-                                  stopNamePickUp: data[index].stopName ?? '',
-                                  pickUpIndex: index
-                                );
+                                if (stops.destinationIndex == null) {
+                                  stops.updateDestination(
+                                    stopNameDestination: data[index].stopName ?? '',
+                                    destinationIndex: index
+                                  );
+                                } else {
+                                  stops.updatePickUp(
+                                    stopNamePickUp: data[index].stopName ?? '',
+                                    pickUpIndex: index
+                                  );
+                                }
+                              }
+                              if (stops.destinationIndex != null && stops.pickUpIndex != null) {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(builder: (context) => const SelectBusScreen()
@@ -106,7 +121,6 @@ class _StopsListView extends State<StopsListView> {
                                   color: CustomThemeColors.themeBlue
                                 )
                               ),
-                              // Other properties you want to display
                             ),
                           ),
                         );
