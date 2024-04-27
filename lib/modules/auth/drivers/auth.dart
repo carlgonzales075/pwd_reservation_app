@@ -52,6 +52,36 @@ Future<Credentials> postLogin(String email, String password) async {
   }
 }
 
+Future<Credentials> postRefresh(String refreshToken, String mode) async {
+  Map<String, dynamic> requestBody = {
+    'refresh_token': refreshToken,
+    'mode': mode
+  };
+  try {
+    final response = await http.post(
+      Uri.parse('${DomainEnvs.getDomain()}/auth/login'),
+      headers: {"Content-type": "application/json"},
+      body: json.encode(requestBody)
+    );
+    if (response.statusCode == 200) {
+      return Credentials.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+    } else {
+      Map<String, dynamic> responseData = jsonDecode(response.body);
+      List<dynamic> errors = responseData['errors'];
+      if (errors.isNotEmpty) {
+        Map<String, dynamic> error = errors[0];
+        String errorMessage = error['message'];
+        String errorCode = error['extensions']['code'];
+        throw Exception('$errorCode: $errorMessage ${response.headers}');
+      } else {
+        throw Exception('Login failed: Unknown error');
+      }
+    }
+  } catch(e) {
+    throw Exception(e.toString());
+  }
+}
+
 class UserProvider extends ChangeNotifier {
   String? firstName;
   String? lastName;

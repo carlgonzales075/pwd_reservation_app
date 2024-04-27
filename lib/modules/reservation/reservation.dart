@@ -69,33 +69,34 @@ class _StopsListView extends State<StopsListView> {
                             setState(() {
                               if (stops.destinationIndex == index) {
                                 stops.updateDestination(
+                                  destinationId: null,
                                   stopNameDestination: null,
                                   destinationIndex: null
                                 );
                               } else if (stops.pickUpIndex == index) {
                                 stops.updatePickUp(
+                                  pickupId: null,
                                   stopNamePickUp: null,
                                   pickUpIndex: null
                                 );
                               } else {
                                 if (stops.destinationIndex == null) {
                                   stops.updateDestination(
+                                    destinationId: data[index].id ?? '',
                                     stopNameDestination: data[index].stopName ?? '',
                                     destinationIndex: index
                                   );
                                 } else {
                                   stops.updatePickUp(
+                                    pickupId: data[index].id ?? '',
                                     stopNamePickUp: data[index].stopName ?? '',
                                     pickUpIndex: index
                                   );
                                 }
                               }
                               if (stops.destinationIndex != null && stops.pickUpIndex != null) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => const SelectBusScreen()
-                                  )
-                                );
+                                Navigator.pushNamed(context, '/select-bus');
+                                
                               }
                             });
                           },

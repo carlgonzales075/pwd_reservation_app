@@ -43,6 +43,44 @@ class _ApiProfileImage extends State<ApiProfileImage> {
   }
 }
 
+class BusImage extends StatefulWidget {
+  const BusImage({super.key, required this.assetId});
+  final String assetId;
+  @override
+  State<BusImage> createState() => _BusImage();
+}
+
+class _BusImage extends State<BusImage> {
+  @override
+  Widget build (BuildContext context) {
+    return Consumer<UserProvider>(
+      builder: (context, userProvider, child) {
+        return Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: NetworkImage(
+                '${DomainEnvs.getDomain()}/assets/${widget.assetId}'
+              ),
+            ),
+            boxShadow: const [
+              BoxShadow(
+                color: CustomThemeColors.themeGrey,
+                offset: Offset(
+                  2.0,
+                  2.0,
+                ),
+                blurRadius: 10.0,
+                spreadRadius: 2.0,
+              ), //BoxShadow //BoxShadow
+            ],
+            borderRadius: const BorderRadius.all(Radius.circular(20.0))
+          ),
+        );
+      }
+    );
+  }
+}
+
 // class OtherImage extends StatefulWidget {
 //   const OtherImage({
 //     super.key

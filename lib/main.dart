@@ -6,6 +6,7 @@ import 'package:pwd_reservation_app/modules/home/home_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:pwd_reservation_app/modules/reservation/drivers/routes.dart';
 import 'package:pwd_reservation_app/modules/reservation/reservation.dart';
+import 'package:pwd_reservation_app/modules/reservation/select_bus.dart';
 // import 'package:camera/camera.dart';
 
 Future<void> main() async {
@@ -40,7 +41,8 @@ class MyApp extends StatelessWidget {
           "/": (BuildContext context) => const MainAuthScreen(),
           "/register": (BuildContext context) => const RegisterAuthScreen(),
           "/home": (BuildContext context) => const HomeScreen(),
-          "/reservation": (BuildContext context) => const ReservationScreen()
+          "/reservation": (BuildContext context) => const ReservationScreen(),
+          "/select-bus": (BuildContext context) => const SelectBusScreen()
         }
       ); 
    } 
