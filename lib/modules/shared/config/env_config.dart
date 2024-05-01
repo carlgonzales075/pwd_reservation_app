@@ -1,5 +1,5 @@
 class DomainEnvs {
-  static const String _devEnvDomain = 'http://172.19.240.1:8080';
+  static const String _devEnvDomain = 'http://172.23.192.1:8080';
   static const String _prodEnvDomain = 'http://sample.com';
   static const bool isDev = true;
 

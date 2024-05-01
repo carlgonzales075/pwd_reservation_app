@@ -30,6 +30,7 @@ class _RegisterAuthScreen extends State<RegisterAuthScreen> {
 
       if (mounted) {
         Provider.of<UserProvider>(context, listen: false).updateUser(
+          userId: user.userId,
           firstName: user.firstName,
           lastName: user.lastName,
           description: user.description,

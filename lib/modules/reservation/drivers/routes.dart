@@ -7,18 +7,18 @@ import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
 class StopsProvider extends ChangeNotifier {
   String? stopNameDestination;
   int? destinationIndex;
-  late String destinationId;
+  String? destinationId;
   String? stopNamePickUp;
   int? pickUpIndex;
-  late String pickupId;
+  String? pickupId;
 
   void updateDestination({
     required String? stopNameDestination,
     required String? destinationId,
-    required int? destinationIndex
+    required int? destinationIndex,
   }) {
     this.stopNameDestination = stopNameDestination;
-    this.destinationId = destinationId!;
+    this.destinationId = destinationId;
     this.destinationIndex = destinationIndex;
     notifyListeners();
   }
@@ -31,6 +31,30 @@ class StopsProvider extends ChangeNotifier {
     this.stopNamePickUp = stopNamePickUp;
     this.pickupId = pickupId!;
     this.pickUpIndex = pickUpIndex;
+    notifyListeners();
+  }
+
+  void resetDestination() {
+    stopNameDestination = null;
+    destinationIndex = null;
+    destinationId = null;
+    notifyListeners();
+  }
+
+  void resetPickup() {
+    stopNamePickUp = null;
+    pickUpIndex = null;
+    pickupId = null;
+    notifyListeners();
+  }
+
+  void resetValues() {
+    stopNameDestination = null;
+    destinationIndex = null;
+    destinationId = null;
+    stopNamePickUp = null;
+    pickUpIndex = null;
+    pickupId = null;
     notifyListeners();
   }
 }

@@ -1,4 +1,5 @@
 class User {
+  final String userId;
   final String firstName;
   final String lastName;
   final String? description;
@@ -6,6 +7,7 @@ class User {
   final String? email;
 
   const User({
+    required this.userId,
     required this.firstName,
     required this.lastName,
     this.description,
@@ -17,6 +19,7 @@ class User {
     final data = json['data'] as Map<String, dynamic>?;
 
     if (data != null) {
+      final userId = data['id'] as String;
       final firstName = data['first_name'] as String?;
       final lastName = data['last_name'] as String?;
       final description = data['description'] as String?;
@@ -25,6 +28,7 @@ class User {
 
       if (firstName != null && lastName != null) {
         return User(
+          userId: userId,
           firstName: firstName,
           lastName: lastName,
           description: description,

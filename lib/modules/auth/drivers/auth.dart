@@ -20,6 +20,13 @@ class CredentialsProvider extends ChangeNotifier {
     this.expires = expires;
     notifyListeners();
   }
+
+  void resetValues() {
+    accessToken = null;
+    refreshToken = null;
+    expires = null;
+    notifyListeners();
+  }
 }
 
 Future<Credentials> postLogin(String email, String password) async {
@@ -83,6 +90,7 @@ Future<Credentials> postRefresh(String refreshToken, String mode) async {
 }
 
 class UserProvider extends ChangeNotifier {
+  String? userId;
   String? firstName;
   String? lastName;
   String? description;
@@ -90,12 +98,14 @@ class UserProvider extends ChangeNotifier {
   String? email;
 
   void updateUser({
+    required String userId,
     required String firstName,
     required String lastName,
     String? description,
     String? avatar,
     String? email
   }) {
+    this.userId = userId;
     this.firstName = firstName;
     this.lastName = lastName;
     this.description = description;

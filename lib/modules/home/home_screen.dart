@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:pwd_reservation_app/commons/themes/theme_modules.dart';
 import 'package:provider/provider.dart';
 import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
+import 'package:pwd_reservation_app/modules/reservation/drivers/routes.dart';
 import 'package:pwd_reservation_app/modules/shared/drivers/images.dart';
 import 'package:pwd_reservation_app/modules/shared/widgets/widgets_module.dart';
 
@@ -79,11 +80,8 @@ class LogOutButton extends StatelessWidget {
       return IconButton(
       onPressed: () {
         logOut(credentials.refreshToken);
-        credentials.updateCredentials(
-          accessToken: '',
-          refreshToken: '',
-          expires: 0
-        );
+        credentials.resetValues();
+        context.read<StopsProvider>().resetValues();
         Navigator.pushNamed(context, '/');
       },
       icon: const Icon(

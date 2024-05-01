@@ -3,7 +3,7 @@ import 'package:pwd_reservation_app/commons/themes/theme_modules.dart';
 import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
 import 'package:pwd_reservation_app/modules/reservation/drivers/routes.dart';
 import 'package:provider/provider.dart';
-import 'package:pwd_reservation_app/modules/reservation/select_bus.dart';
+// import 'package:pwd_reservation_app/modules/reservation/select_bus.dart';
 // import 'package:pwd_reservation_app/modules/shared/widgets/widgets_module.dart';
 
 class ReservationScreen extends StatelessWidget {
@@ -34,8 +34,7 @@ class StopsListView extends StatefulWidget {
   const StopsListView({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _StopsListView createState() => _StopsListView();
+  State<StopsListView> createState() => _StopsListView();
 }
 
 class _StopsListView extends State<StopsListView> {
@@ -55,9 +54,6 @@ class _StopsListView extends State<StopsListView> {
               child: Text('Error: ${snapshot.error}'),
             );
             } else {
-              // return Center(
-              //   child: Text('${snapshot.data}'),
-              // );
               List<Stops>? data = snapshot.data;
                 return ListView.builder(
                   itemCount: data!.length,
@@ -68,29 +64,21 @@ class _StopsListView extends State<StopsListView> {
                           onTap: () {
                             setState(() {
                               if (stops.destinationIndex == index) {
-                                stops.updateDestination(
-                                  destinationId: null,
-                                  stopNameDestination: null,
-                                  destinationIndex: null
-                                );
+                                stops.resetDestination();
                               } else if (stops.pickUpIndex == index) {
-                                stops.updatePickUp(
-                                  pickupId: null,
-                                  stopNamePickUp: null,
-                                  pickUpIndex: null
-                                );
+                                stops.resetPickup();
                               } else {
-                                if (stops.destinationIndex == null) {
-                                  stops.updateDestination(
-                                    destinationId: data[index].id ?? '',
-                                    stopNameDestination: data[index].stopName ?? '',
-                                    destinationIndex: index
-                                  );
-                                } else {
+                                if (stops.pickUpIndex == null) {
                                   stops.updatePickUp(
                                     pickupId: data[index].id ?? '',
                                     stopNamePickUp: data[index].stopName ?? '',
                                     pickUpIndex: index
+                                  );
+                                } else {
+                                  stops.updateDestination(
+                                    destinationId: data[index].id ?? '',
+                                    stopNameDestination: data[index].stopName ?? '',
+                                    destinationIndex: index
                                   );
                                 }
                               }
