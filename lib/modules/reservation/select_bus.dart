@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:pwd_reservation_app/commons/themes/theme_modules.dart';
 import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
 import 'package:pwd_reservation_app/modules/auth/drivers/auth_convert.dart';
+import 'package:pwd_reservation_app/modules/reservation/drivers/bus_selected.dart';
 import 'package:pwd_reservation_app/modules/reservation/drivers/routes.dart';
 import 'package:provider/provider.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -271,7 +272,63 @@ class BusCarouselItemDesc extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: BasicElevatedButton(
               buttonText: 'Select ${vehicle.getNestedValue('vehicle_id.vehicle_name')}',
-              onPressed: () {}
+              onPressed: () async {
+                try {
+                  PassengerSeatAssignment seatAssignment = await postSeatReservation(
+                    context,
+                    context.read<CredentialsProvider>().accessToken as String,
+                    vehicle.getNestedValue('vehicle_id.id'),
+                    context.read<StopsProvider>().pickupId as String,
+                    context.read<StopsProvider>().destinationId as String
+                  );
+                  
+                  if (context.mounted) {
+                    ReservationInfo reservationInfo = await getReservationInfo(
+                      context.read<CredentialsProvider>().accessToken as String,
+                      seatAssignment.seatAssigned as String
+                    );
+
+                    if (context.mounted) {
+                      context.read<ReservationProvider>().initReservation(
+                        reservationInfo.seatName,
+                        reservationInfo.routeName,
+                        reservationInfo.vehicleName,
+                        reservationInfo.busStopName,
+                        reservationInfo.distance
+                      );
+                      context.read<PassengerProvider>().assignSeat(
+                        seatAssigned: seatAssignment.seatAssigned as String, 
+                        isWaiting: seatAssignment.isWaiting as bool
+                      );
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Booking Successful!'),
+                            content: const Text('You are now booked for a ride!'),
+                            actions: <Widget>[
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                  textStyle: Theme.of(context).textTheme.labelLarge,
+                                ),
+                                child: const Text('OK'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  Navigator.pushNamed(context, '/home');
+                                },
+                              ),
+                            ],
+                          );
+                        }
+                      );
+                    }
+                    
+                  }
+                } catch (e) {
+                  // Handle any errors that occurred during the seat reservation
+                  throw Exception('Error: $e');
+                }
+              }
             ),
           ),
           RowDesc(

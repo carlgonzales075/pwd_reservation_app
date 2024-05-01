@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:pwd_reservation_app/modules/reservation/drivers/bus_selected.dart';
 import 'package:pwd_reservation_app/modules/shared/widgets/widgets_module.dart';
 import 'package:pwd_reservation_app/commons/themes/theme_modules.dart';
 import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
@@ -105,7 +106,6 @@ class _LoginScreenFields extends State<LoginScreenFields> {
   Future<void> _getUserInfo(String accessToken) async {
     try {
       User user = await getUser(accessToken);
-
       if (mounted) {
         Provider.of<UserProvider>(context, listen: false).updateUser(
           userId: user.userId,
@@ -115,6 +115,29 @@ class _LoginScreenFields extends State<LoginScreenFields> {
           avatar: user.avatar,
           email: user.email,
         );
+        Passengers passenger = await getPassenger(user.userId, accessToken);
+        if (mounted) {
+          context.read<PassengerProvider>().initPassenger(
+            id: passenger.id,
+            passengerType: passenger.passengerType,
+            disabilityInfo: passenger.disabilityInfo,
+            seatAssigned: passenger.seatAssigned,
+            isWaiting: passenger.isWaiting,
+            isOnRoute: passenger.isOnRoute
+          );
+        }
+
+        ReservationInfo reservationInfo = await getReservationInfo(
+          accessToken, passenger.seatAssigned as String);
+        if (mounted) {
+          context.read<ReservationProvider>().initReservation(
+            reservationInfo.seatName,
+            reservationInfo.routeName,
+            reservationInfo.vehicleName,
+            reservationInfo.busStopName,
+            reservationInfo.distance
+          );
+        }
       }
     } catch (e) {
       showDialog(

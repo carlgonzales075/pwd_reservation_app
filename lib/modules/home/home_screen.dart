@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:pwd_reservation_app/commons/themes/theme_modules.dart';
 import 'package:provider/provider.dart';
 import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
+import 'package:pwd_reservation_app/modules/reservation/drivers/bus_selected.dart';
 import 'package:pwd_reservation_app/modules/reservation/drivers/routes.dart';
 import 'package:pwd_reservation_app/modules/shared/drivers/images.dart';
 import 'package:pwd_reservation_app/modules/shared/widgets/widgets_module.dart';
@@ -82,6 +83,8 @@ class LogOutButton extends StatelessWidget {
         logOut(credentials.refreshToken);
         credentials.resetValues();
         context.read<StopsProvider>().resetValues();
+        context.read<PassengerProvider>().resetPassenger();
+        context.read<ReservationProvider>().resetReservation();
         Navigator.pushNamed(context, '/');
       },
       icon: const Icon(
@@ -161,78 +164,39 @@ class HomeScreenBody extends StatelessWidget {
   Widget build (BuildContext context) {
     return Consumer<UserProvider>(
       builder: (context, userProvider, child) {
-        return SingleChildScrollView(
+        return const SingleChildScrollView(
           scrollDirection: Axis.vertical,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(10, 5, 10, 0),
+            padding: EdgeInsets.fromLTRB(10, 5, 10, 0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                const SizedBox(height: 15.0),
-                const Text(
+                SizedBox(height: 15.0),
+                Text(
                   'My PWD Card',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: CustomThemeColors.themeBlue
                   ),
                 ),
-                const SizedBox(height: 8.0),
-                const Card(
+                SizedBox(height: 8.0),
+                Card(
                   color: CustomThemeColors.themeBlue,
                   child: HomeScreenNameCard(),
                 ),
-                const SizedBox(height: 14.0),
-                const Text(
-                  'Next Transit',
+                SizedBox(height: 14.0),
+                Text(
+                  'Booking Info',
                   style: TextStyle(
                     color: CustomThemeColors.themeBlue,
                     fontWeight: FontWeight.bold
                   ),
                 ),
-                const SizedBox(height: 8.0),
-                const Card(
-                  color: CustomThemeColors.themeLightBlue,
-                  child: SizedBox(
-                    height: 130,
-                    child: Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Align(
-                            alignment: Alignment.topRight,
-                            child: Text(
-                              'EDSA Carousel',
-                              style: TextStyle(
-                                color: CustomThemeColors.themeWhite,
-                                fontWeight: FontWeight.bold
-                              ),
-                            ),
-                          ),
-                          Align(
-                            alignment: Alignment.bottomLeft,
-                            child: Text(
-                              'Taft Avenue',
-                              style: TextStyle(
-                                color: CustomThemeColors.themeWhite,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  )
-                ),
-                const SizedBox(height: 20.0),
-                BasicElevatedButton(
-                  buttonText: 'Book Reservation',
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/reservation');
-                  }
-                )
+                SizedBox(height: 8.0),
+                BookingInfoCard(),
+                SizedBox(height: 20.0),
+                BookReservationButton()
               ],
             )
           ),
@@ -241,3 +205,218 @@ class HomeScreenBody extends StatelessWidget {
     );
   }
 }
+
+class BookReservationButton extends StatelessWidget {
+  const BookReservationButton({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (context.read<PassengerProvider>().seatAssigned == null) {
+      return BasicElevatedButton(
+        buttonText: 'Book Reservation',
+        onPressed: () {
+          Navigator.pushNamed(context, '/reservation');
+        }
+      );
+    } else {
+      return ElevatedButton(
+        onPressed: () {
+          cancelBooking(context.read<CredentialsProvider>().accessToken as String,
+            context.read<PassengerProvider>().id as String,
+            context.read<PassengerProvider>().seatAssigned as String
+          );
+          context.read<ReservationProvider>().resetReservation();
+          context.read<PassengerProvider>().aloftSeat();
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Cancelled Reservation'),
+                content: const Text('You\'re cancellation is complete.'),
+                actions: <Widget>[
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      textStyle: Theme.of(context).textTheme.labelLarge,
+                    ),
+                    child: const Text('OK'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.pushNamed(context, '/home');
+                    },
+                  ),
+                ],
+              );
+            }
+          );
+        },
+        style: TextButton.styleFrom(
+              textStyle: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Colors.red
+              ),
+            ),
+        child: const Text('Cancel Booking')
+      );
+    }
+  }
+}
+
+class BookingInfoCard extends StatefulWidget {
+  const BookingInfoCard({
+    super.key
+  });
+
+  @override
+  State<BookingInfoCard> createState() => _BookingInfoCard();
+}
+class _BookingInfoCard extends State<BookingInfoCard> {
+  @override
+  Widget build(BuildContext context) {
+    if (context.read<PassengerProvider>().seatAssigned != null) {
+
+      return Consumer<ReservationProvider>(
+        builder: (context, reservation, child) {
+          return Card(
+            color: CustomThemeColors.themeLightBlue,
+            child: SizedBox(
+              height: 130,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: Text(
+                        '${reservation.vehicleName}',
+                        style: const TextStyle(
+                          color: CustomThemeColors.themeWhite,
+                          fontWeight: FontWeight.bold
+                        ),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Column(
+                        children: [
+                          Text(
+                            '${reservation.busStopName}',
+                            style: const TextStyle(
+                              color: CustomThemeColors.themeWhite,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20
+                            ),
+                          ),
+                          Text(
+                            '${reservation.routeName}',
+                            style: const TextStyle(
+                              color: CustomThemeColors.themeWhite
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.bottomLeft,
+                      child: RichText(
+                        text: 
+                          TextSpan(
+                            children: <TextSpan>[
+                              TextSpan(
+                                text: '${reservation.distance}',
+                                style: const TextStyle(
+                                  color: CustomThemeColors.themeWhite,
+                                  fontWeight: FontWeight.bold
+                                ),
+                              ),
+                              const TextSpan(
+                                text: ' Stops to Go',
+                                style: TextStyle(
+                                  color: CustomThemeColors.themeWhite
+                                ),
+                              ),
+                              const TextSpan(
+                                text: ' | ',
+                                style: TextStyle(
+                                  color: CustomThemeColors.themeWhite,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20
+                                ),
+                              ),
+                              const TextSpan(
+                                text: 'Seat #: ',
+                                style: TextStyle(
+                                  color: CustomThemeColors.themeBlue
+                                ),
+                              ),
+                              TextSpan(
+                                text: '${reservation.seatName}',
+                                style: const TextStyle(
+                                  color: CustomThemeColors.themeWhite,
+                                  fontWeight: FontWeight.bold
+                                ),
+                              ),
+                            ],
+                          ),
+                        
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            )
+          );
+        }
+      );
+    } else {
+      return const Card(
+            color: CustomThemeColors.themeLightBlue,
+            child: SizedBox(
+              height: 130,
+              child: Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: Text(
+                        '',
+                        style: TextStyle(
+                          color: CustomThemeColors.themeWhite,
+                          fontWeight: FontWeight.bold
+                        ),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        'Book a Bus Now Below!!',
+                        style: TextStyle(
+                          color: CustomThemeColors.themeGrey,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20
+                        ),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: Text(
+                        '',
+                        style: TextStyle(
+                          color: CustomThemeColors.themeWhite,
+                          fontWeight: FontWeight.bold
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            )
+          );
+        }
+    }
+  }
