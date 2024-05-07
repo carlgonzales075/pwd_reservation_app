@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
 import 'package:pwd_reservation_app/modules/reservation/drivers/bus_selected.dart';
 import 'package:pwd_reservation_app/modules/reservation/drivers/routes.dart';
+import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
 import 'package:pwd_reservation_app/modules/shared/drivers/images.dart';
 import 'package:pwd_reservation_app/modules/shared/widgets/widgets_module.dart';
 
@@ -52,7 +53,9 @@ class HomeScreenHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 IconButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pushNamed(context, "/domain");
+                  },
                   icon: const Icon(
                     Icons.menu,
                     color: CustomThemeColors.themeWhite,
@@ -80,7 +83,7 @@ class LogOutButton extends StatelessWidget {
       builder: (context, credentials, child) {
       return IconButton(
       onPressed: () {
-        logOut(credentials.refreshToken);
+        logOut(credentials.refreshToken, context.read<DomainProvider>().url as String);
         credentials.resetValues();
         context.read<StopsProvider>().resetValues();
         context.read<PassengerProvider>().resetPassenger();
@@ -225,7 +228,8 @@ class BookReservationButton extends StatelessWidget {
         onPressed: () {
           cancelBooking(context.read<CredentialsProvider>().accessToken as String,
             context.read<PassengerProvider>().id as String,
-            context.read<PassengerProvider>().seatAssigned as String
+            context.read<PassengerProvider>().seatAssigned as String,
+            context.read<DomainProvider>().url as String
           );
           context.read<ReservationProvider>().resetReservation();
           context.read<PassengerProvider>().aloftSeat();

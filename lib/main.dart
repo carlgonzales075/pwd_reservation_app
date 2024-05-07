@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:pwd_reservation_app/modules/auth/auth_modules.dart';
 import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
 import 'package:pwd_reservation_app/modules/auth/register/register.dart';
+import 'package:pwd_reservation_app/modules/domain/domain.dart';
 import 'package:pwd_reservation_app/modules/home/home_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:pwd_reservation_app/modules/reservation/drivers/bus_selected.dart';
 import 'package:pwd_reservation_app/modules/reservation/drivers/routes.dart';
 import 'package:pwd_reservation_app/modules/reservation/reservation.dart';
 import 'package:pwd_reservation_app/modules/reservation/select_bus.dart';
+import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
 // import 'package:camera/camera.dart';
 
 Future<void> main() async {
@@ -28,7 +30,10 @@ Future<void> main() async {
             create: (context) => PassengerProvider()
           ),
           ChangeNotifierProvider(
-            create: (context) => ReservationProvider())
+            create: (context) => ReservationProvider()
+          ),
+          ChangeNotifierProvider(
+            create: (context) => DomainProvider())
       ],
       child: const MyApp(),
     )
@@ -48,7 +53,8 @@ class MyApp extends StatelessWidget {
           "/register": (BuildContext context) => const RegisterAuthScreen(),
           "/home": (BuildContext context) => const HomeScreen(),
           "/reservation": (BuildContext context) => const ReservationScreen(),
-          "/select-bus": (BuildContext context) => const SelectBusScreen()
+          "/select-bus": (BuildContext context) => const SelectBusScreen(),
+          "/domain": (BuildContext context) => const DomainScreen()
         }
       ); 
    } 

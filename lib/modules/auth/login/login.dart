@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pwd_reservation_app/modules/reservation/drivers/bus_selected.dart';
+import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
 import 'package:pwd_reservation_app/modules/shared/widgets/widgets_module.dart';
 import 'package:pwd_reservation_app/commons/themes/theme_modules.dart';
 import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
@@ -11,10 +12,51 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Stack(
-      children: <Widget>[
-        HomePageLogo(),
-        LoginCard()
+    return Stack(
+      children: [
+        Consumer<DomainProvider>(
+          builder: (context, myData, child) {
+            if (myData.ipAddress == null) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return const NoDomainAlert();
+                  },
+                );
+              });
+            }
+            return const HomePageLogo();
+
+          },
+        ),
+        const LoginCard()
+      ],
+    );
+  }
+}
+
+class NoDomainAlert extends StatefulWidget {
+  const NoDomainAlert({super.key});
+
+  @override
+  State<NoDomainAlert> createState() => _NoDomainAlert();
+}
+
+class _NoDomainAlert extends State<NoDomainAlert> {
+  @override
+  Widget build (BuildContext context) {
+    return AlertDialog(
+      title: const Text('No Domain Set'),
+      content: const Text('Set the domain to start testing.'),
+      actions: <Widget>[
+        ElevatedButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+            Navigator.pushNamed(context, '/domain');
+          },
+          child: const Text('OK')
+        )
       ],
     );
   }
@@ -105,38 +147,42 @@ class _LoginScreenFields extends State<LoginScreenFields> {
 
   Future<void> _getUserInfo(String accessToken) async {
     try {
-      User user = await getUser(accessToken);
       if (mounted) {
-        Provider.of<UserProvider>(context, listen: false).updateUser(
-          userId: user.userId,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          description: user.description,
-          avatar: user.avatar,
-          email: user.email,
-        );
-        Passengers passenger = await getPassenger(user.userId, accessToken);
+        User user = await getUser(accessToken, context.read<DomainProvider>().url as String);
         if (mounted) {
-          context.read<PassengerProvider>().initPassenger(
-            id: passenger.id,
-            passengerType: passenger.passengerType,
-            disabilityInfo: passenger.disabilityInfo,
-            seatAssigned: passenger.seatAssigned,
-            isWaiting: passenger.isWaiting,
-            isOnRoute: passenger.isOnRoute
+          Provider.of<UserProvider>(context, listen: false).updateUser(
+            userId: user.userId,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            description: user.description,
+            avatar: user.avatar,
+            email: user.email,
           );
-        }
-
-        ReservationInfo reservationInfo = await getReservationInfo(
-          accessToken, passenger.seatAssigned as String);
-        if (mounted) {
-          context.read<ReservationProvider>().initReservation(
-            reservationInfo.seatName,
-            reservationInfo.routeName,
-            reservationInfo.vehicleName,
-            reservationInfo.busStopName,
-            reservationInfo.distance
-          );
+          Passengers passenger = await getPassenger(user.userId, accessToken,
+          context.read<DomainProvider>().url as String);
+          if (mounted) {
+            context.read<PassengerProvider>().initPassenger(
+              id: passenger.id,
+              passengerType: passenger.passengerType,
+              disabilityInfo: passenger.disabilityInfo,
+              seatAssigned: passenger.seatAssigned,
+              isWaiting: passenger.isWaiting,
+              isOnRoute: passenger.isOnRoute
+            );
+          }
+          if (mounted) {
+            ReservationInfo reservationInfo = await getReservationInfo(
+              accessToken, passenger.seatAssigned as String, context.read<DomainProvider>().url as String);
+            if (mounted) {
+              context.read<ReservationProvider>().initReservation(
+                reservationInfo.seatName,
+                reservationInfo.routeName,
+                reservationInfo.vehicleName,
+                reservationInfo.busStopName,
+                reservationInfo.distance
+              );
+            }
+          }
         }
       }
     } catch (e) {
@@ -161,20 +207,22 @@ class _LoginScreenFields extends State<LoginScreenFields> {
     }
   }
 
-  Future<void> _login() async {
+  Future<void> _login(String domain) async {
     String email = _userNameController.text;
     String password = _passWordController.text;
 
     try {
-      Credentials credentials = await postLogin(email, password);
-      
       if (mounted) {
-        Provider.of<CredentialsProvider>(context, listen: false).updateCredentials(
-          accessToken: credentials.accessToken,
-          refreshToken: credentials.refreshToken,
-          expires: credentials.expires
-        );
-        await _getUserInfo(credentials.accessToken);
+        Credentials credentials = await postLogin(email, password, domain);
+        
+        if (mounted) {
+          Provider.of<CredentialsProvider>(context, listen: false).updateCredentials(
+            accessToken: credentials.accessToken,
+            refreshToken: credentials.refreshToken,
+            expires: credentials.expires
+          );
+          await _getUserInfo(credentials.accessToken);
+        }
       }
       // ignore: use_build_context_synchronously
       Navigator.pushNamed(context, '/home');
@@ -216,14 +264,16 @@ class _LoginScreenFields extends State<LoginScreenFields> {
                 fontSize: 15,
               ),
             ),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushNamed(context, "/domain");
+            },
             child: const Text('Forgot Password?'),
           ),
         ),
         BasicElevatedButton(
           buttonText: 'Login',
           onPressed: () {
-            _login();
+            _login(context.read<DomainProvider>().url as String);
           },
         ),
         Row(

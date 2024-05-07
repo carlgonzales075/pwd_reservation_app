@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
 
 class StopsProvider extends ChangeNotifier {
   String? stopNameDestination;
@@ -77,10 +76,8 @@ class Stops {
   }
 }
 
-Future<List<Stops>> getStops(String accessToken) async {
-  var url = Uri.parse('${
-    DomainEnvs.getDomain()
-    }/items/stops?fields=id,stop_name,stop_point_location&filter[status][_eq]=published&sort=-sort');
+Future<List<Stops>> getStops(String accessToken, String domain) async {
+  var url = Uri.parse('$domain/items/stops?fields=id,stop_name,stop_point_location&filter[status][_eq]=published&sort=-sort');
   try {
     final response = await http.get(
       url,
@@ -151,11 +148,9 @@ class Vehicles {
 }
 
 Future<List<Vehicles>> postVehicles(
-  String accessToken, String pickupId, String destinationId
+  String accessToken, String pickupId, String destinationId, String domain
   ) async {
-  var url = Uri.parse('${
-    DomainEnvs.getDomain()
-    }/flows/trigger/5d1a6ed4-3ff6-4e53-a8f2-1852ec6cef63');
+  var url = Uri.parse('$domain/flows/trigger/5d1a6ed4-3ff6-4e53-a8f2-1852ec6cef63');
   try {
     final response = await http.post(
       url,

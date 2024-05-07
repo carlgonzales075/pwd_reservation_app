@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
-import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
 import 'package:http/http.dart' as http;
 
 class Passengers {
@@ -131,7 +130,8 @@ class PassengerProvider extends ChangeNotifier {
 Future<PassengerSeatAssignment> postSeatReservation(BuildContext context, String accessToken,
   String vehicleId,
   String stopPickUpId,
-  String stopDestinationId
+  String stopDestinationId,
+  String domain
 ) async {
   try {
     final requestBody = jsonEncode(<String, dynamic> {
@@ -142,10 +142,9 @@ Future<PassengerSeatAssignment> postSeatReservation(BuildContext context, String
       "occupied_to": stopDestinationId
     });
     if (context.mounted) {
-      print(context.read<PassengerProvider>().id);
       final response = await http.post(
         Uri.parse(
-          '${DomainEnvs.getDomain()}/flows/trigger/c0d98000-1626-4b95-aea7-0107a0ba7cd2'
+          '$domain/flows/trigger/c0d98000-1626-4b95-aea7-0107a0ba7cd2'
         ),
         headers: {
           "Content-type": 'application/json',
@@ -176,16 +175,15 @@ Future<PassengerSeatAssignment> postSeatReservation(BuildContext context, String
   }
 }
 
-Future<Passengers> getPassenger(String userId, String accessToken) async {
+Future<Passengers> getPassenger(String userId, String accessToken, String domain) async {
   try {
     final response = await http.get(
-      Uri.parse('${DomainEnvs.getDomain()}/items/passengers?filter[user_id][_eq]=$userId'),
+      Uri.parse('$domain/items/passengers?filter[user_id][_eq]=$userId'),
       headers: {
         "Authorization": "Bearer $accessToken"
       }
     );
     if (response.statusCode == 200) {
-      print(response.body);
       return Passengers.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
     } else {
       Map<String, dynamic> responseData = jsonDecode(response.body);
@@ -230,14 +228,14 @@ class ReservationInfo {
   }
 }
 
-Future<ReservationInfo> getReservationInfo (String accessToken, String seatId) async {
+Future<ReservationInfo> getReservationInfo (String accessToken, String seatId, String domain) async {
   try {
     final requestBody = jsonEncode(<String, dynamic> {
       "seat_id": seatId
     });
       final response = await http.post(
         Uri.parse(
-          '${DomainEnvs.getDomain()}/flows/trigger/9ba5a643-bb8a-4fb3-bf97-1a868a32ed78'
+          '$domain/flows/trigger/9ba5a643-bb8a-4fb3-bf97-1a868a32ed78'
         ),
         headers: {
           "Content-type": 'application/json',
@@ -265,7 +263,7 @@ Future<ReservationInfo> getReservationInfo (String accessToken, String seatId) a
   }
 }
 
-Future<String?> cancelBooking(String accessToken, String passengerId, String seatId) async {
+Future<String?> cancelBooking(String accessToken, String passengerId, String seatId, String domain) async {
   try {
     final requestBody = jsonEncode(<String, dynamic> {
       "seat_id": seatId,
@@ -273,7 +271,7 @@ Future<String?> cancelBooking(String accessToken, String passengerId, String sea
     });
       final response = await http.post(
         Uri.parse(
-          '${DomainEnvs.getDomain()}/flows/trigger/472fb2d2-8d8d-464a-842f-ea52da4b032c'
+          '$domain/flows/trigger/472fb2d2-8d8d-464a-842f-ea52da4b032c'
         ),
         headers: {
           "Content-type": 'application/json',

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pwd_reservation_app/commons/themes/theme_modules.dart';
+import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
 import 'package:pwd_reservation_app/modules/shared/widgets/widgets_module.dart';
 import 'package:pwd_reservation_app/modules/auth/register/register_upload.dart';
 import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
@@ -24,19 +25,21 @@ class _RegisterAuthScreen extends State<RegisterAuthScreen> {
   String buttonText = 'Create Account';
   bool isChecked = false;
 
-  Future<void> _getUserInfo(String accessToken) async {
+  Future<void> _getUserInfo(String accessToken, String domain) async {
     try {
-      User user = await getUser(accessToken);
-
       if (mounted) {
-        Provider.of<UserProvider>(context, listen: false).updateUser(
-          userId: user.userId,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          description: user.description,
-          avatar: user.avatar,
-          email: user.email,
-        );
+        User user = await getUser(accessToken, domain);
+
+        if (mounted) {
+          Provider.of<UserProvider>(context, listen: false).updateUser(
+            userId: user.userId,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            description: user.description,
+            avatar: user.avatar,
+            email: user.email,
+          );
+        }
       }
     } catch (e) {
       showDialog(
@@ -78,7 +81,7 @@ class _RegisterAuthScreen extends State<RegisterAuthScreen> {
       // print('Email $email');
       // print('Password $password');
       try {
-        await _register();
+        await _register(context.read<DomainProvider>().url as String);
       } catch (e) {
         showDialog(
           // ignore: use_build_context_synchronously
@@ -108,15 +111,21 @@ class _RegisterAuthScreen extends State<RegisterAuthScreen> {
         }
       } else {
         try {
-          Credentials credentials = await postLogin(email, password);
-          
           if (mounted) {
-            Provider.of<CredentialsProvider>(context, listen: false).updateCredentials(
-              accessToken: credentials.accessToken,
-              refreshToken: credentials.refreshToken,
-              expires: credentials.expires
+            Credentials credentials = await postLogin(email, password,
+              context.read<DomainProvider>().url as String
             );
-            await _getUserInfo(credentials.accessToken);
+            
+            if (mounted) {
+              Provider.of<CredentialsProvider>(context, listen: false).updateCredentials(
+                accessToken: credentials.accessToken,
+                refreshToken: credentials.refreshToken,
+                expires: credentials.expires
+              );
+              await _getUserInfo(credentials.accessToken,
+                context.read<DomainProvider>().url as String
+              );
+            }
           }
           // ignore: use_build_context_synchronously
           Navigator.pushNamed(context, '/home');
@@ -163,7 +172,7 @@ class _RegisterAuthScreen extends State<RegisterAuthScreen> {
     }
   }
 
-  Future<void> _register() async {
+  Future<void> _register(String domain) async {
     final firstName = _firstName.text;
     final lastName = _lastName.text;
     final email = _email.text;
@@ -173,7 +182,8 @@ class _RegisterAuthScreen extends State<RegisterAuthScreen> {
         firstName,
         lastName,
         email,
-        password
+        password,
+        domain
       );
     } catch (e) {
       showDialog(

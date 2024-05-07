@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:pwd_reservation_app/modules/auth/drivers/auth_convert.dart';
-import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
 import 'package:flutter/material.dart';
 
 class CredentialsProvider extends ChangeNotifier {
@@ -29,14 +28,14 @@ class CredentialsProvider extends ChangeNotifier {
   }
 }
 
-Future<Credentials> postLogin(String email, String password) async {
+Future<Credentials> postLogin(String email, String password, String domain) async {
   Map<String, dynamic> requestBody = {
     'email': email,
     'password': password
   };
   try {
     final response = await http.post(
-      Uri.parse('${DomainEnvs.getDomain()}/auth/login'),
+      Uri.parse('$domain/auth/login'),
       headers: {"Content-type": "application/json"},
       body: json.encode(requestBody)
     );
@@ -59,14 +58,14 @@ Future<Credentials> postLogin(String email, String password) async {
   }
 }
 
-Future<Credentials> postRefresh(String refreshToken, String mode) async {
+Future<Credentials> postRefresh(String refreshToken, String mode, String domain) async {
   Map<String, dynamic> requestBody = {
     'refresh_token': refreshToken,
     'mode': mode
   };
   try {
     final response = await http.post(
-      Uri.parse('${DomainEnvs.getDomain()}/auth/login'),
+      Uri.parse('$domain/auth/login'),
       headers: {"Content-type": "application/json"},
       body: json.encode(requestBody)
     );
@@ -115,10 +114,10 @@ class UserProvider extends ChangeNotifier {
   }
 }
   //Need to remove this from this class and then update login to await this function prior to moving to the home screen.
-Future<User> getUser(String accessToken) async {
+Future<User> getUser(String accessToken, String domain) async {
   try {
     final response = await http.get(
-      Uri.parse('${DomainEnvs.getDomain()}/users/me'),
+      Uri.parse('$domain/users/me'),
       headers: <String, String>{
         "Authorization": "Bearer $accessToken"
     });
@@ -145,7 +144,8 @@ Future<void> postCreateUser(
     String firstName,
     String lastName,
     String email,
-    String password
+    String password,
+    String domain
 ) async {
 
   // print('First Name: $firstName');
@@ -161,7 +161,7 @@ Future<void> postCreateUser(
   try {
       // print(requestBody);
       final response = await http.post(
-        Uri.parse('${DomainEnvs.getDomain()}/users'),
+        Uri.parse('$domain/users'),
         headers: {"Content-type": "application/json"},
         body: json.encode(requestBody)
       );
@@ -182,13 +182,13 @@ Future<void> postCreateUser(
   }
 }
 
-Future<void> logOut(String? refreshToken) async {
+Future<void> logOut(String? refreshToken, String domain) async {
   Map<String, dynamic> requestBody = {
     'refresh_token': refreshToken
   };
   try {
     final response = await http.post(
-      Uri.parse('${DomainEnvs.getDomain()}/auth/logout'),
+      Uri.parse('$domain/auth/logout'),
       headers: {"Content-type": "application/json"},
       body: json.encode(requestBody)
     );

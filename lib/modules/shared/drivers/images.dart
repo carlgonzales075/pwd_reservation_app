@@ -19,6 +19,8 @@ class ApiProfileImage extends StatefulWidget {
 class _ApiProfileImage extends State<ApiProfileImage> {
   @override
   Widget build (BuildContext context) {
+    String domain = context.read<DomainProvider>().url as String;
+
     return Consumer<UserProvider>(
       builder: (context, userProvider, child) {
         return CircleAvatar(
@@ -30,7 +32,7 @@ class _ApiProfileImage extends State<ApiProfileImage> {
             decoration: BoxDecoration(
               image: DecorationImage(
                 image: userProvider.avatar != null ? NetworkImage(
-                  '${DomainEnvs.getDomain()}/assets/${userProvider.avatar}?fit=cover&width=40&height=40'
+                  '$domain/assets/${userProvider.avatar}?fit=cover&width=40&height=40'
                 ) : const AssetImage('assets/images/profileIcon100.jpg') as ImageProvider,
                 fit: BoxFit.cover,
               ),
@@ -53,13 +55,15 @@ class BusImage extends StatefulWidget {
 class _BusImage extends State<BusImage> {
   @override
   Widget build (BuildContext context) {
+    String domain = context.read<DomainProvider>().url as String;
+
     return Consumer<UserProvider>(
       builder: (context, userProvider, child) {
         return Container(
           decoration: BoxDecoration(
             image: DecorationImage(
               image: NetworkImage(
-                '${DomainEnvs.getDomain()}/assets/${widget.assetId}'
+                '$domain/assets/${widget.assetId}'
               ),
             ),
             boxShadow: const [

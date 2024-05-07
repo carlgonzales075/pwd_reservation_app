@@ -3,6 +3,7 @@ import 'package:pwd_reservation_app/commons/themes/theme_modules.dart';
 import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
 import 'package:pwd_reservation_app/modules/reservation/drivers/routes.dart';
 import 'package:provider/provider.dart';
+import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
 // import 'package:pwd_reservation_app/modules/reservation/select_bus.dart';
 // import 'package:pwd_reservation_app/modules/shared/widgets/widgets_module.dart';
 
@@ -43,7 +44,7 @@ class _StopsListView extends State<StopsListView> {
     return Consumer<CredentialsProvider> (
       builder: (context, credentials, child) {
         return FutureBuilder(
-          future: getStops('${credentials.accessToken}'),
+          future: getStops('${credentials.accessToken}', context.read<DomainProvider>().url as String),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(

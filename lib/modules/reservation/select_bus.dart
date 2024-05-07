@@ -1,14 +1,13 @@
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import 'package:pwd_reservation_app/commons/themes/theme_modules.dart';
 import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
-import 'package:pwd_reservation_app/modules/auth/drivers/auth_convert.dart';
 import 'package:pwd_reservation_app/modules/reservation/drivers/bus_selected.dart';
 import 'package:pwd_reservation_app/modules/reservation/drivers/routes.dart';
 import 'package:provider/provider.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
 import 'package:pwd_reservation_app/modules/shared/drivers/images.dart';
 import 'package:pwd_reservation_app/modules/shared/widgets/widgets_module.dart';
 
@@ -49,7 +48,8 @@ class SelectBusScreen extends StatelessWidget {
             future: postVehicles(
               context.read<CredentialsProvider>().accessToken as String,
               stops.pickupId as String,
-              stops.destinationId as String
+              stops.destinationId as String,
+              context.read<DomainProvider>().url as String
             ),
             builder: (BuildContext context, AsyncSnapshot<List<Vehicles>> snapshot) {
               if (snapshot.hasData) {
@@ -279,13 +279,15 @@ class BusCarouselItemDesc extends StatelessWidget {
                     context.read<CredentialsProvider>().accessToken as String,
                     vehicle.getNestedValue('vehicle_id.id'),
                     context.read<StopsProvider>().pickupId as String,
-                    context.read<StopsProvider>().destinationId as String
+                    context.read<StopsProvider>().destinationId as String,
+                    context.read<DomainProvider>().url as String
                   );
                   
                   if (context.mounted) {
                     ReservationInfo reservationInfo = await getReservationInfo(
                       context.read<CredentialsProvider>().accessToken as String,
-                      seatAssignment.seatAssigned as String
+                      seatAssignment.seatAssigned as String,
+                      context.read<DomainProvider>().url as String
                     );
 
                     if (context.mounted) {
