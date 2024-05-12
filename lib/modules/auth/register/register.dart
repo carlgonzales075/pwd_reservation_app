@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:pwd_reservation_app/commons/themes/theme_modules.dart';
 import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
 import 'package:pwd_reservation_app/modules/shared/widgets/widgets_module.dart';
-import 'package:pwd_reservation_app/modules/auth/register/register_upload.dart';
 import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
 import 'package:pwd_reservation_app/modules/auth/drivers/auth_convert.dart';
 
@@ -102,14 +101,6 @@ class _RegisterAuthScreen extends State<RegisterAuthScreen> {
           }
         );
       }
-      if (isChecked) {
-        if (mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const UploadScreen())
-          );
-        }
-      } else {
         try {
           if (mounted) {
             Credentials credentials = await postLogin(email, password,
@@ -149,7 +140,6 @@ class _RegisterAuthScreen extends State<RegisterAuthScreen> {
             }
           );
         }
-      }
     } else {
       showDialog(
         // ignore: use_build_context_synchronously
@@ -282,16 +272,16 @@ class _RegisterAuthScreen extends State<RegisterAuthScreen> {
                   controller: _confirmPassword,
                 ),
                 const SizedBox(height: 20.0),
-                BasicCheckBox(
-                  value: isChecked,
-                  checkboxText: 'Are you a PWD/SC/Pregnant Passenger?',
-                  onChanged: (bool? value) {
-                    setState(() {
-                      isChecked = value!;
-                      buttonText = isChecked ? 'Next' : 'Create Account';
-                    });
-                  },
-                ),
+                // BasicCheckBox(
+                //   value: isChecked,
+                //   checkboxText: 'Are you a PWD/SC/Pregnant Passenger?',
+                //   onChanged: (bool? value) {
+                //     setState(() {
+                //       isChecked = value!;
+                //       buttonText = 'Create Account';
+                //     });
+                //   },
+                // ),
                 BasicElevatedButton(
                   buttonText: buttonText,
                   onPressed: () {_registerHelperFunc(isChecked);},

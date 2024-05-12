@@ -156,7 +156,7 @@ Future<void> postCreateUser(
     'last_name': lastName,
     'email': email,
     'password': password,
-    'role': '2120ecea-1994-43a6-b8dd-c852a37bf535'
+    'role': "dc504f63-7040-45c6-9aa8-f9adb6bf57aa"
   };
   try {
       // print(requestBody);

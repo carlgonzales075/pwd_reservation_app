@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+// import 'package:flutter/widgets.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:pwd_reservation_app/commons/themes/theme_modules.dart';
 import 'package:pwd_reservation_app/modules/shared/widgets/widgets_module.dart';
 // import 'package:pwd_reservation_app/modules/shared/drivers/camera.dart';
@@ -32,18 +34,49 @@ class UploadScreen extends StatelessWidget {
             BasicStringDropDownMenu(),
             SizedBox(height: 10.0),
             Text('Front of ID'),
-            Card(child: Text('Placeholder1')),
+            CameraButtonHelper(),
             SizedBox(height: 10.0),
             Text('Back of ID'),
-            Card(child: Text('Placeholder2')),
+            CameraButtonHelper(),
             SizedBox(height: 10.0),
             Text('Selfie'),
-            Card(child: Text('Placeholder2')),
+            CameraButtonHelper(),
             UploadCreateAccount()
           ],
         ),
       ),
     );
+  }
+}
+
+class CameraButtonHelper extends StatelessWidget {
+  const CameraButtonHelper({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(height: 100.0,
+      child: GestureDetector(
+        onTap: () async {
+          FilePickerResult? result = await FilePicker.platform.pickFiles();
+
+          if (result != null) {
+            print(result.files.first.name);
+          }
+        },
+        child: const Card(child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(Icons.camera_alt_rounded),
+              SizedBox(width: 20.0),
+              Text('Placeholder1'),
+            ],
+          )
+        )),
+      ));
   }
 }
 

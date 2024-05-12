@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:pwd_reservation_app/commons/themes/theme_modules.dart';
 import 'package:provider/provider.dart';
 import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
+import 'package:pwd_reservation_app/modules/home/side_menu.dart';
 import 'package:pwd_reservation_app/modules/reservation/drivers/bus_selected.dart';
 import 'package:pwd_reservation_app/modules/reservation/drivers/routes.dart';
 import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
@@ -14,8 +15,14 @@ class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
   @override
   Widget build (BuildContext context) {
-    return const Scaffold(
-      body: SafeArea(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(''),
+        backgroundColor: CustomThemeColors.themeBlue,
+        foregroundColor: CustomThemeColors.themeWhite,
+      ),
+      drawer: const NavDrawer(),
+      body: const SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -37,34 +44,34 @@ class HomeScreenHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: const BoxDecoration(
+    return const DecoratedBox(
+      decoration: BoxDecoration(
         color: CustomThemeColors.themeBlue,
         borderRadius: BorderRadius.vertical(top: Radius.zero, bottom: Radius.circular(10))
       ),
       child: SizedBox(
-        height: 150,
+        height: 100,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                IconButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, "/domain");
-                  },
-                  icon: const Icon(
-                    Icons.menu,
-                    color: CustomThemeColors.themeWhite,
-                  )
-                ),
-                const LogOutButton()
-              ],
-            ),
-            const HomeScreenNameCard()
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //   crossAxisAlignment: CrossAxisAlignment.center,
+            //   children: <Widget>[
+            //     IconButton(
+            //       onPressed: () {
+            //         Navigator.pushNamed(context, "/domain");
+            //       },
+            //       icon: const Icon(
+            //         Icons.menu,
+            //         color: CustomThemeColors.themeWhite,
+            //       )
+            //     ),
+            //     const LogOutButton()
+            //   ],
+            // ),
+            HomeScreenNameCard()
           ],
         ),
       ),
