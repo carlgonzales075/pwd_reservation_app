@@ -34,7 +34,6 @@ class _RegisterAuthScreen extends State<RegisterAuthScreen> {
             userId: user.userId,
             firstName: user.firstName,
             lastName: user.lastName,
-            description: user.description,
             avatar: user.avatar,
             email: user.email,
           );

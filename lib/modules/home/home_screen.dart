@@ -142,7 +142,7 @@ class HomeScreenNameCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      userProvider.description ?? 'No Disability',
+                      context.read<PassengerProvider>().disabilityInfo ?? 'No Disability',
                       style: const TextStyle(color: CustomThemeColors.themeWhite)
                     )
                   ],

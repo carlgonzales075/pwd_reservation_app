@@ -3,8 +3,6 @@ import 'package:pwd_reservation_app/modules/auth/auth_modules.dart';
 import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
 import 'package:pwd_reservation_app/modules/auth/register/register.dart';
 import 'package:pwd_reservation_app/modules/auth/register/register_upload.dart';
-import 'package:pwd_reservation_app/modules/camera/camera.dart';
-import 'package:pwd_reservation_app/modules/camera/drivers/camera_widget_driver.dart';
 import 'package:pwd_reservation_app/modules/domain/domain.dart';
 import 'package:pwd_reservation_app/modules/home/home_screen.dart';
 import 'package:provider/provider.dart';

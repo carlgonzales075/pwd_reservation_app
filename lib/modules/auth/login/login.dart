@@ -154,7 +154,6 @@ class _LoginScreenFields extends State<LoginScreenFields> {
             userId: user.userId,
             firstName: user.firstName,
             lastName: user.lastName,
-            description: user.description,
             avatar: user.avatar,
             email: user.email,
           );

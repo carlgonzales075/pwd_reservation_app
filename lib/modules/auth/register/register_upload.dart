@@ -1,71 +1,164 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 // import 'package:flutter/widgets.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:pwd_reservation_app/commons/themes/theme_modules.dart';
+import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
+import 'package:pwd_reservation_app/modules/auth/register/drivers/file_upload.dart';
+import 'package:pwd_reservation_app/modules/reservation/drivers/bus_selected.dart';
+import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
 import 'package:pwd_reservation_app/modules/shared/widgets/widgets_module.dart';
 // import 'package:pwd_reservation_app/modules/shared/drivers/camera.dart';
 
-class UploadScreen extends StatelessWidget {
+class UploadScreen extends StatefulWidget {
   const UploadScreen({super.key});
 
   @override
-  Widget build (BuildContext context) {
+  State<UploadScreen> createState() => _UploadScreenState();
+}
+
+class _UploadScreenState extends State<UploadScreen> {
+  final List<File?> _selectedImages = List.generate(3, (_) => null);
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: CustomThemeColors.themeBlue,
-        elevation: 0,
-        title: const Text(
-                'Upload ID',
-                style: TextStyle(
-                  color: CustomThemeColors.themeWhite,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18
-                ),
-        )
+        title: const Text('Upload ID'),
       ),
-      body: const Padding(
-        padding: EdgeInsets.all(8.0),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Text('Select either a PWD or a Senior Citizen ID:'),
-            SizedBox(height: 10.0),
-            BasicStringDropDownMenu(),
-            SizedBox(height: 10.0),
-            Text('Front of ID'),
-            CameraButtonHelper(),
-            SizedBox(height: 10.0),
-            Text('Back of ID'),
-            CameraButtonHelper(),
-            SizedBox(height: 10.0),
-            Text('Selfie'),
-            CameraButtonHelper(),
-            UploadCreateAccount()
+          children: [
+            const Text('Select either a PWD or a Senior Citizen ID:'),
+            const BasicStringDropDownMenu(),
+            const SizedBox(height: 10.0),
+            _buildCameraButton(0, 'Front of ID', _selectedImages),
+            const SizedBox(height: 10.0),
+            _buildCameraButton(1, 'Back of ID', _selectedImages),
+            const SizedBox(height: 10.0),
+            _buildCameraButton(2, 'Selfie', _selectedImages),
+            const SizedBox(height: 20.0),
+            ElevatedButton(
+              onPressed: () async {
+                List<String> imageIds = await uploadImages(
+                  context.read<DomainProvider>().url as String,
+                  context.read<CredentialsProvider>().accessToken as String,
+                  _selectedImages
+                ) as List<String>;
+                // print(imageIds);
+                if (context.mounted) {
+                  try {
+                    await postImageProcessing(
+                      context.read<DomainProvider>().url as String,
+                      context.read<CredentialsProvider>().accessToken as String,
+                      imageIds,
+                      context.read<PassengerProvider>().id as String
+                    );
+                    if (context.mounted) {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Application Submitted'),
+                            content: const Text('We received your application and we will review it and get back within 48 hours.'),
+                            actions: <Widget>[
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text('Back')
+                              )
+                            ],
+                          );
+                        }
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Failed Upload'),
+                            content: const Text('An error occurred while uploading.'),
+                            actions: <Widget>[
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text('Back')
+                              )
+                            ],
+                          );
+                        }
+                      );
+                    }
+                  }
+                  
+                }
+              },
+              child: const Text('Upload'),
+            ),
           ],
         ),
       ),
     );
   }
+
+  Widget _buildCameraButton(int index, String label, List<File?> selectedImages) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label),
+        const SizedBox(height: 10.0),
+        CameraButtonHelper(
+          selectedImages: selectedImages,
+          index: index,
+        ),
+      ],
+    );
+  }
 }
 
-class CameraButtonHelper extends StatelessWidget {
+class CameraButtonHelper extends StatefulWidget {
   const CameraButtonHelper({
-    super.key,
+    super.key, required this.selectedImages, required this.index
   });
+
+  // final void Function(File? image) onImageSelected;
+  final List<File?> selectedImages;
+  final int index;
+
+  @override
+  State<CameraButtonHelper> createState() => _CameraButtonHelperState();
+}
+
+class _CameraButtonHelperState extends State<CameraButtonHelper> {
+  File? _selectedImage;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(height: 100.0,
       child: GestureDetector(
         onTap: () async {
-          FilePickerResult? result = await FilePicker.platform.pickFiles();
+          FilePickerResult? result = await FilePicker.platform.pickFiles(
+            type: FileType.image
+          );
 
           if (result != null) {
-            print(result.files.first.name);
+            setState(() {
+              _selectedImage = File(result.files.single.path!);
+              widget.selectedImages[widget.index] = _selectedImage;
+            });
           }
         },
-        child: const Card(child: Center(
+        child: _selectedImage == null ? 
+        const Card(child: Center(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -75,7 +168,13 @@ class CameraButtonHelper extends StatelessWidget {
               Text('Placeholder1'),
             ],
           )
-        )),
+        ))
+        : Image.file(
+          _selectedImage!,
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: double.infinity,
+        )
       ));
   }
 }

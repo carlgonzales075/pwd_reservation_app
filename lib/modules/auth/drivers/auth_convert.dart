@@ -2,7 +2,6 @@ class User {
   final String userId;
   final String firstName;
   final String lastName;
-  final String? description;
   final String? avatar;
   final String? email;
 
@@ -10,7 +9,6 @@ class User {
     required this.userId,
     required this.firstName,
     required this.lastName,
-    this.description,
     this.avatar,
     this.email
   });
@@ -22,7 +20,6 @@ class User {
       final userId = data['id'] as String;
       final firstName = data['first_name'] as String?;
       final lastName = data['last_name'] as String?;
-      final description = data['description'] as String?;
       final avatar = data['avatar'] as String?;
       final email = data['email'] as String?;
 
@@ -31,14 +28,13 @@ class User {
           userId: userId,
           firstName: firstName,
           lastName: lastName,
-          description: description,
           avatar: avatar,
           email: email
         );
       }
     }
   
-   throw const FormatException('Failed to load credentials.');
+    throw const FormatException('Failed to load credentials.');
   }
 }
 
