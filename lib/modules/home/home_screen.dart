@@ -20,6 +20,22 @@ class HomeScreen extends StatelessWidget {
         title: const Text(''),
         backgroundColor: CustomThemeColors.themeBlue,
         foregroundColor: CustomThemeColors.themeWhite,
+        actions: <Widget>[
+          IconButton(
+            onPressed: () {
+              logOut(
+                context.read<CredentialsProvider>().refreshToken,
+                context.read<DomainProvider>().url as String
+              );
+              context.read<CredentialsProvider>().resetValues();
+              context.read<StopsProvider>().resetValues();
+              context.read<PassengerProvider>().resetPassenger();
+              context.read<ReservationProvider>().resetReservation();
+              Navigator.pushNamed(context, '/');
+            },
+            icon: const Icon(Icons.logout)
+          )
+        ],
       ),
       drawer: const NavDrawer(),
       body: const SafeArea(

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:pwd_reservation_app/modules/auth/auth_modules.dart';
 import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
+import 'package:pwd_reservation_app/modules/auth/drivers/employee.dart';
 import 'package:pwd_reservation_app/modules/auth/register/register.dart';
 import 'package:pwd_reservation_app/modules/auth/register/register_upload.dart';
 import 'package:pwd_reservation_app/modules/domain/domain.dart';
+import 'package:pwd_reservation_app/modules/employee/employee_screen.dart';
 import 'package:pwd_reservation_app/modules/home/home_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:pwd_reservation_app/modules/reservation/drivers/bus_selected.dart';
@@ -37,9 +39,11 @@ Future<void> main() async {
             create: (context) => ReservationProvider()
           ),
           ChangeNotifierProvider(
-            create: (context) => DomainProvider()),
-          // ChangeNotifierProvider(
-          //   create: (context) => CameraProvider())
+            create: (context) => DomainProvider()
+          ),
+          ChangeNotifierProvider(
+            create: (context) => EmployeeProvider()
+          ),
       ],
       child: const MyApp(),
     )
@@ -57,9 +61,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(primarySwatch: Colors.blue), 
         routes: <String, WidgetBuilder> {
           "/": (BuildContext context) => const MainAuthScreen(),
-          // '/camera': (BuildContext context) => CameraApp(
-          //   cameras: context.read<CameraProvider>().cameras as List<CameraDescription>
-          // ),
+          "/employee-home": (BuildContext context) => const EmployeeHomeScreen(),
           "/register": (BuildContext context) => const RegisterAuthScreen(),
           "/register-upload": (BuildContext context) => const UploadScreen(),
           "/home": (BuildContext context) => const HomeScreen(),

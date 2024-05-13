@@ -4,13 +4,15 @@ class User {
   final String lastName;
   final String? avatar;
   final String? email;
+  final String? role;
 
   const User({
     required this.userId,
     required this.firstName,
     required this.lastName,
     this.avatar,
-    this.email
+    this.email,
+    this.role
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -22,6 +24,7 @@ class User {
       final lastName = data['last_name'] as String?;
       final avatar = data['avatar'] as String?;
       final email = data['email'] as String?;
+      final role = data['role']['name'] as String?;
 
       if (firstName != null && lastName != null) {
         return User(
@@ -29,7 +32,8 @@ class User {
           firstName: firstName,
           lastName: lastName,
           avatar: avatar,
-          email: email
+          email: email,
+          role: role
         );
       }
     }

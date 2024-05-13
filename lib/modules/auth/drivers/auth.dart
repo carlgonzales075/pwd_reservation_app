@@ -95,6 +95,7 @@ class UserProvider extends ChangeNotifier {
   String? description;
   String? avatar;
   String? email;
+  String? role;
 
   void updateUser({
     required String userId,
@@ -102,7 +103,8 @@ class UserProvider extends ChangeNotifier {
     required String lastName,
     String? description,
     String? avatar,
-    String? email
+    String? email,
+    String? role
   }) {
     this.userId = userId;
     this.firstName = firstName;
@@ -110,6 +112,7 @@ class UserProvider extends ChangeNotifier {
     this.description = description;
     this.avatar = avatar;
     this.email = email;
+    this.role = role;
     notifyListeners();
   }
 }
@@ -117,7 +120,7 @@ class UserProvider extends ChangeNotifier {
 Future<User> getUser(String accessToken, String domain) async {
   try {
     final response = await http.get(
-      Uri.parse('$domain/users/me'),
+      Uri.parse('$domain/users/me?fields=*,role.name'),
       headers: <String, String>{
         "Authorization": "Bearer $accessToken"
     });

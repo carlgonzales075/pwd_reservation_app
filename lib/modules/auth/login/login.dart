@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:pwd_reservation_app/modules/auth/drivers/employee.dart';
 import 'package:pwd_reservation_app/modules/reservation/drivers/bus_selected.dart';
 import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
 import 'package:pwd_reservation_app/modules/shared/widgets/widgets_module.dart';
@@ -145,7 +146,7 @@ class _LoginScreenFields extends State<LoginScreenFields> {
   final TextEditingController _passWordController = TextEditingController();
   late Future<Credentials> credentials;
 
-  Future<void> _getUserInfo(String accessToken) async {
+  Future _getUserInfo(String accessToken) async {
     try {
       if (mounted) {
         User user = await getUser(accessToken, context.read<DomainProvider>().url as String);
@@ -156,34 +157,56 @@ class _LoginScreenFields extends State<LoginScreenFields> {
             lastName: user.lastName,
             avatar: user.avatar,
             email: user.email,
+            role: user.role
           );
-          Passengers passenger = await getPassenger(user.userId, accessToken,
-          context.read<DomainProvider>().url as String);
-          if (mounted) {
-            context.read<PassengerProvider>().initPassenger(
-              id: passenger.id,
-              passengerType: passenger.passengerType,
-              disabilityInfo: passenger.disabilityInfo,
-              seatAssigned: passenger.seatAssigned,
-              isWaiting: passenger.isWaiting,
-              isOnRoute: passenger.isOnRoute
+          List<String> validRoles = ['Driver', 'Conductor', 'Employee'];
+
+          if (validRoles.contains(user.role)) {
+            Employee employee = await getEmployeeInfo(
+              context.read<DomainProvider>().url as String,
+              accessToken,
+              user.userId
             );
-          }
-          if (mounted) {
-            ReservationInfo reservationInfo = await getReservationInfo(
-              accessToken, passenger.seatAssigned as String, context.read<DomainProvider>().url as String);
             if (mounted) {
-              context.read<ReservationProvider>().initReservation(
-                reservationInfo.seatName,
-                reservationInfo.routeName,
-                reservationInfo.vehicleName,
-                reservationInfo.busStopName,
-                reservationInfo.distance
+              context.read<EmployeeProvider>().initEmployee(
+                employee.id,
+                employee.isConductor,
+                employee.isDriver,
+                employee.assignedVehicle
               );
             }
+            return 'Employee';
+          } else {
+            Passengers passenger = await getPassenger(user.userId, accessToken,
+            context.read<DomainProvider>().url as String);
+            if (mounted) {
+              context.read<PassengerProvider>().initPassenger(
+                id: passenger.id,
+                passengerType: passenger.passengerType,
+                disabilityInfo: passenger.disabilityInfo,
+                seatAssigned: passenger.seatAssigned,
+                isWaiting: passenger.isWaiting,
+                isOnRoute: passenger.isOnRoute
+              );
+            }
+            if (mounted) {
+              ReservationInfo reservationInfo = await getReservationInfo(
+                accessToken, passenger.seatAssigned as String, context.read<DomainProvider>().url as String);
+              if (mounted) {
+                context.read<ReservationProvider>().initReservation(
+                  reservationInfo.seatName,
+                  reservationInfo.routeName,
+                  reservationInfo.vehicleName,
+                  reservationInfo.busStopName,
+                  reservationInfo.distance
+                );
+              }
+            }
+            return 'Passenger';
           }
         }
       }
+      return 'Passenger';
     } catch (e) {
       showDialog(
         // ignore: use_build_context_synchronously
@@ -211,6 +234,7 @@ class _LoginScreenFields extends State<LoginScreenFields> {
     String password = _passWordController.text;
 
     try {
+      late String userType;
       if (mounted) {
         Credentials credentials = await postLogin(email, password, domain);
         
@@ -220,11 +244,16 @@ class _LoginScreenFields extends State<LoginScreenFields> {
             refreshToken: credentials.refreshToken,
             expires: credentials.expires
           );
-          await _getUserInfo(credentials.accessToken);
+          userType = await _getUserInfo(credentials.accessToken);
         }
       }
-      // ignore: use_build_context_synchronously
-      Navigator.pushNamed(context, '/home');
+      if (mounted) {
+        if (userType == 'Passenger') {
+          Navigator.pushNamed(context, '/home');
+        } else {
+          Navigator.pushNamed(context, '/employee-home');
+        }
+      }
     } catch (e) {
       showDialog(
         // ignore: use_build_context_synchronously
