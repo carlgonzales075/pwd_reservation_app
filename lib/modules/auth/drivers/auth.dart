@@ -125,6 +125,7 @@ Future<User> getUser(String accessToken, String domain) async {
         "Authorization": "Bearer $accessToken"
     });
     if (response.statusCode == 200) {
+      // print(response.body);
       return User.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
     } else {
       Map<String, dynamic> responseData = jsonDecode(response.body);

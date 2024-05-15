@@ -19,14 +19,19 @@ class User {
     final data = json['data'] as Map<String, dynamic>?;
 
     if (data != null) {
-      final userId = data['id'] as String;
+      final userId = data['id'].toString();
       final firstName = data['first_name'] as String?;
       final lastName = data['last_name'] as String?;
       final avatar = data['avatar'] as String?;
       final email = data['email'] as String?;
       final role = data['role']['name'] as String?;
-
       if (firstName != null && lastName != null) {
+        print(userId);
+        print(firstName);
+        print(lastName);
+        print(avatar);
+        print(email);
+        print(role);
         return User(
           userId: userId,
           firstName: firstName,

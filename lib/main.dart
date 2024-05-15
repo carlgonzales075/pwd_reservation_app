@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:pwd_reservation_app/modules/auth/auth_modules.dart';
 import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
-import 'package:pwd_reservation_app/modules/auth/drivers/employee.dart';
+import 'package:pwd_reservation_app/modules/employee/drivers/dispatch_info.dart';
+import 'package:pwd_reservation_app/modules/employee/drivers/employee.dart';
 import 'package:pwd_reservation_app/modules/auth/register/register.dart';
 import 'package:pwd_reservation_app/modules/auth/register/register_upload.dart';
 import 'package:pwd_reservation_app/modules/domain/domain.dart';
+import 'package:pwd_reservation_app/modules/employee/drivers/partner_employee.dart';
+import 'package:pwd_reservation_app/modules/employee/drivers/screen_change.dart';
+import 'package:pwd_reservation_app/modules/employee/drivers/vehicle_info_extended.dart';
+import 'package:pwd_reservation_app/modules/employee/drivers/vehicle_route_info.dart';
 import 'package:pwd_reservation_app/modules/employee/employee_screen.dart';
 import 'package:pwd_reservation_app/modules/home/home_screen.dart';
 import 'package:provider/provider.dart';
@@ -43,6 +48,21 @@ Future<void> main() async {
           ),
           ChangeNotifierProvider(
             create: (context) => EmployeeProvider()
+          ),
+          ChangeNotifierProvider(
+            create: (context) => EmployeeScreenSwitcher()
+          ),
+          ChangeNotifierProvider(
+            create: (context) => VehicleRouteInfoProvider()
+          ),
+          ChangeNotifierProvider(
+            create: (context) => DispatchInfoProvider()
+          ),
+          ChangeNotifierProvider(
+            create: (context) => VehicleInfoExtendedProvider()
+          ),
+          ChangeNotifierProvider(
+            create: (context) => PartnerEmployeeProvider()
           ),
       ],
       child: const MyApp(),

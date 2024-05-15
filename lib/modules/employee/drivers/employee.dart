@@ -21,8 +21,21 @@ class Employee {
     final id = data['id'] as String;
     final isConductor = data['is_conductor'] as bool;
     final isDriver = data['is_driver'] as bool;
-    final assignedVehicle = data['assigned_vehicle_driver'][0];
-    return Employee(id, isConductor, isDriver, assignedVehicle) ;
+    dynamic assignedVehicle;
+    if (isConductor) {
+      final List<dynamic> conductorVehicle = data['assigned_vehicle_conductor'];
+      if (conductorVehicle.length == 1) {
+        assignedVehicle = data['assigned_vehicle_conductor'][0];
+      }
+    } else if (isDriver) {
+      final List<dynamic> driverVehicle = data['assigned_vehicle_driver'];
+      if (driverVehicle.length == 1) {
+        assignedVehicle = data['assigned_vehicle_driver'][0];
+      }
+    } else {
+      assignedVehicle = null;
+    }
+    return Employee(id, isConductor, isDriver, assignedVehicle);
   }
 }
 

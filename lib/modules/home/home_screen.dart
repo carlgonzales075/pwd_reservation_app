@@ -3,6 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:pwd_reservation_app/commons/themes/theme_modules.dart';
 import 'package:provider/provider.dart';
 import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
+import 'package:pwd_reservation_app/modules/employee/drivers/dispatch_info.dart';
+import 'package:pwd_reservation_app/modules/employee/drivers/partner_employee.dart';
+import 'package:pwd_reservation_app/modules/employee/drivers/screen_change.dart';
+import 'package:pwd_reservation_app/modules/employee/drivers/vehicle_info_extended.dart';
+import 'package:pwd_reservation_app/modules/employee/drivers/vehicle_route_info.dart';
 import 'package:pwd_reservation_app/modules/home/side_menu.dart';
 import 'package:pwd_reservation_app/modules/reservation/drivers/bus_selected.dart';
 import 'package:pwd_reservation_app/modules/reservation/drivers/routes.dart';
@@ -31,6 +36,11 @@ class HomeScreen extends StatelessWidget {
               context.read<StopsProvider>().resetValues();
               context.read<PassengerProvider>().resetPassenger();
               context.read<ReservationProvider>().resetReservation();
+              context.read<EmployeeScreenSwitcher>().resetSwitcher();
+              context.read<PartnerEmployeeProvider>().resetValues();
+              context.read<VehicleRouteInfoProvider>().resetVehicleRouteInfo();
+              context.read<DispatchInfoProvider>().resetDispatchInfo();
+              context.read<VehicleInfoExtendedProvider>().resetVehicleInfoExtended();
               Navigator.pushNamed(context, '/');
             },
             icon: const Icon(Icons.logout)
@@ -111,6 +121,11 @@ class LogOutButton extends StatelessWidget {
         context.read<StopsProvider>().resetValues();
         context.read<PassengerProvider>().resetPassenger();
         context.read<ReservationProvider>().resetReservation();
+        context.read<EmployeeScreenSwitcher>().resetSwitcher();
+        context.read<PartnerEmployeeProvider>().resetValues();
+        context.read<VehicleRouteInfoProvider>().resetVehicleRouteInfo();
+        context.read<DispatchInfoProvider>().resetDispatchInfo();
+        context.read<VehicleInfoExtendedProvider>().resetVehicleInfoExtended();
         Navigator.pushNamed(context, '/');
       },
       icon: const Icon(

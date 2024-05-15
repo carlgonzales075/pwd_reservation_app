@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:pwd_reservation_app/modules/auth/drivers/employee.dart';
+import 'package:pwd_reservation_app/modules/employee/drivers/dispatch_info.dart';
+import 'package:pwd_reservation_app/modules/employee/drivers/partner_employee.dart';
+import 'package:pwd_reservation_app/modules/employee/drivers/vehicle_info_extended.dart';
+import 'package:pwd_reservation_app/modules/employee/drivers/vehicle_route_info.dart';
+import 'package:pwd_reservation_app/modules/employee/drivers/employee.dart';
 import 'package:pwd_reservation_app/modules/reservation/drivers/bus_selected.dart';
 import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
 import 'package:pwd_reservation_app/modules/shared/widgets/widgets_module.dart';
@@ -160,7 +164,6 @@ class _LoginScreenFields extends State<LoginScreenFields> {
             role: user.role
           );
           List<String> validRoles = ['Driver', 'Conductor', 'Employee'];
-
           if (validRoles.contains(user.role)) {
             Employee employee = await getEmployeeInfo(
               context.read<DomainProvider>().url as String,
@@ -174,6 +177,87 @@ class _LoginScreenFields extends State<LoginScreenFields> {
                 employee.isDriver,
                 employee.assignedVehicle
               );
+              // print('${employee.assignedVehicle}');
+              if (employee.assignedVehicle != null) {
+                VehicleRouteInfo vehicleRouteInfo = await getVehicleRouteInfo(
+                  context.read<DomainProvider>().url as String,
+                  accessToken,
+                  employee.id
+                );
+                if (mounted) {
+                  context.read<VehicleRouteInfoProvider>().initVehicleRouteInfo(
+                    vehicleRouteInfo.routeId,
+                    vehicleRouteInfo.vehicleId,
+                    vehicleRouteInfo.driverId,
+                    vehicleRouteInfo.conductorId,
+                    vehicleRouteInfo.currentStopId,
+                    vehicleRouteInfo.goingToBusStopId
+                  );
+                  DispatchInfo dispatchInfo = await getDispatchInfo(
+                    context.read<DomainProvider>().url as String,
+                    accessToken,
+                    vehicleRouteInfo.vehicleId as String,
+                    vehicleRouteInfo.routeId as String
+                  );
+                  if (mounted) {
+                    context.read<DispatchInfoProvider>().initDispatchInfo(
+                      dispatchInfo.dispatchId,
+                      dispatchInfo.dateOfDispatch
+                    );
+                    VehicleInfoExtended vehicleInfoExtended = await getVehicleInfoExtended(
+                      context.read<DomainProvider>().url as String,
+                      accessToken,
+                      vehicleRouteInfo.vehicleId as String,
+                      vehicleRouteInfo.routeId as String,
+                      dispatchInfo.dispatchId as String
+                    );
+                    if (mounted) {
+                      // print('how this in');
+                      context.read<VehicleInfoExtendedProvider>().initVehicleInfoExtended(
+                        vehicleInfoExtended.vehicleName,
+                        vehicleInfoExtended.vehiclePlateNumber,
+                        vehicleInfoExtended.vehicleImageId,
+                        vehicleInfoExtended.driverUserId,
+                        vehicleInfoExtended.conductorUserId,
+                        vehicleInfoExtended.normalSeatsRemaining,
+                        vehicleInfoExtended.pwdSeatsRemaining,
+                        vehicleInfoExtended.tripStops
+                      );
+                    //   dynamic partnerId;
+                    //   if (user.role == 'Driver') {
+                    //     partnerId = vehicleInfoExtended.conductorUserId;
+                    //   } else if (user.role == 'Conductor') {
+                    //     partnerId = vehicleInfoExtended.driverUserId;
+                    //   } else {
+                    //     partnerId = null;
+                    //   }
+                    //   // print('$partnerId');
+                    //   if (partnerId != null) {
+                    //     print('this is partnerId $partnerId');
+                    //     PartnerUser partnerEmployee = await getPartnerUser(
+                    //       context.read<DomainProvider>().url as String,
+                    //       accessToken,
+                    //       partnerId
+                    //     );
+                    //     print(partnerEmployee.firstName);
+                    //     // if (mounted) {
+                    //     //   context.read<PartnerEmployeeProvider>().initEmployee(
+                    //     //     partnerEmployee.userId,
+                    //     //     partnerEmployee.firstName,
+                    //     //     partnerEmployee.lastName,
+                    //     //     partnerEmployee.avatar,
+                    //     //     partnerEmployee.email,
+                    //     //     partnerEmployee.role
+                    //     //   );
+                    //     //   print('asdfag ad ');
+                    //     // }
+                      // }
+                    }
+                  }
+                }
+              } else {
+
+              }
             }
             return 'Employee';
           } else {
@@ -190,16 +274,18 @@ class _LoginScreenFields extends State<LoginScreenFields> {
               );
             }
             if (mounted) {
-              ReservationInfo reservationInfo = await getReservationInfo(
-                accessToken, passenger.seatAssigned as String, context.read<DomainProvider>().url as String);
-              if (mounted) {
-                context.read<ReservationProvider>().initReservation(
-                  reservationInfo.seatName,
-                  reservationInfo.routeName,
-                  reservationInfo.vehicleName,
-                  reservationInfo.busStopName,
-                  reservationInfo.distance
-                );
+              if (passenger.seatAssigned != null) {
+                ReservationInfo reservationInfo = await getReservationInfo(
+                  accessToken, passenger.seatAssigned as String, context.read<DomainProvider>().url as String);
+                if (mounted) {
+                  context.read<ReservationProvider>().initReservation(
+                    reservationInfo.seatName,
+                    reservationInfo.routeName,
+                    reservationInfo.vehicleName,
+                    reservationInfo.busStopName,
+                    reservationInfo.distance
+                  );
+                }
               }
             }
             return 'Passenger';

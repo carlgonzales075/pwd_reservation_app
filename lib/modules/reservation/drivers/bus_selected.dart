@@ -281,7 +281,7 @@ Future<String?> cancelBooking(String accessToken, String passengerId, String sea
       );
 
       if (response.statusCode == 200) {
-        Map<String, String> responseBody = jsonDecode(response.body) as Map<String, String>;
+        Map<String, dynamic> responseBody = jsonDecode(response.body) as Map<String, dynamic>;
         return responseBody['data'];
       } else {
         Map<String, dynamic> responseData = jsonDecode(response.body);
