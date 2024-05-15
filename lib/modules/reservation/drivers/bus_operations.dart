@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 
 class BusOperations {
 
-  Future<String> startTrip (String domain, String accessToken, int id, String dispatchId) async {
+  static Future<String> startTrip (String domain, String accessToken, int id, String dispatchId) async {
     final requestBody = jsonEncode({
       "id": id,
       "dispatch_id": dispatchId,
@@ -39,7 +39,7 @@ class BusOperations {
     }
   }
 
-  Future<int> arriveAtStation (String domain, String accessToken, int id) async {
+  static Future<int> arriveAtStation (String domain, String accessToken, int id) async {
     final requestBody = jsonEncode({
       "id": id,
       "arrival_datetime": DateTime.now().toIso8601String()
@@ -55,7 +55,7 @@ class BusOperations {
         body: requestBody
       );
       if (response.statusCode == 200) {
-        return response.body as int;
+        return int.parse(response.body);
       } else {
         Map<String, dynamic> responseData = jsonDecode(response.body);
         List<dynamic> errors = responseData['errors'];
@@ -73,7 +73,7 @@ class BusOperations {
     }
   }
 
-  Future<int> departFromStation (String domain, String accessToken, int id) async {
+  static Future<int> departFromStation (String domain, String accessToken, int id) async {
     final requestBody = jsonEncode({
       "id": id,
       "departure_datetime": DateTime.now().toIso8601String()
@@ -88,7 +88,8 @@ class BusOperations {
         body: requestBody
       );
       if (response.statusCode == 200) {
-        return response.body as int;
+        // print(response.body);
+        return int.parse(response.body);
       } else {
         Map<String, dynamic> responseData = jsonDecode(response.body);
         List<dynamic> errors = responseData['errors'];
@@ -106,7 +107,7 @@ class BusOperations {
     }
   }
 
-  Future<String> endTrip (String domain, String accessToken, int id, String dispatchId) async {
+  static Future<String> endTrip (String domain, String accessToken, int id, String dispatchId) async {
     final requestBody = jsonEncode({
       "id": id,
       "dispatch_id": dispatchId,

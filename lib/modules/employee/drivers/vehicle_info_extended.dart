@@ -73,6 +73,17 @@ class VehicleInfoExtendedProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // void updateArrival(int id) {
+  //   if (tripStops != null) {
+  //     List filteredItems = tripStops!.where((item) {
+  //       if (item is Map<String, dynamic>) {
+  //         return item['departure_datetime'] == null;
+  //       }
+  //       return false;
+  //     }).toList();
+  //   }
+  // }
+
   void resetVehicleInfoExtended() {
     vehicleName = null;
     vehiclePlateNumber = null;

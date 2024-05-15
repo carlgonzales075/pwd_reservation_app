@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pwd_reservation_app/modules/employee/drivers/dispatch_info.dart';
-import 'package:pwd_reservation_app/modules/employee/drivers/partner_employee.dart';
 import 'package:pwd_reservation_app/modules/employee/drivers/vehicle_info_extended.dart';
 import 'package:pwd_reservation_app/modules/employee/drivers/vehicle_route_info.dart';
 import 'package:pwd_reservation_app/modules/employee/drivers/employee.dart';

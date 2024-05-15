@@ -81,15 +81,20 @@ class NextStopBody extends StatelessWidget {
                             color: CustomThemeColors.themeWhite
                           ),
                         ),
-                        Text(
-                          '${context.read<VehicleRouteInfoProvider>().currentStopId != null ? 'Current Stop':'On the way to'}: ${
-                            context.read<VehicleRouteInfoProvider>().currentStopId 
-                            ?? context.read<VehicleRouteInfoProvider>().goingToBusStopId
-                          }',
-                          style: const TextStyle(
-                            color: CustomThemeColors.themeWhite,
-                            fontWeight: FontWeight.bold
-                          ),
+                        Consumer<VehicleRouteInfoProvider>(
+                          builder: (context, routeInfo, child) {
+                            return Text(
+                              "${
+                                routeInfo.currentStopId == '' ? 'Going to' : 'Currently in'
+                                } ${
+                                  routeInfo.currentStopId == '' ? routeInfo.goingToBusStopId : routeInfo.currentStopId
+                                }",
+                              style: const TextStyle(
+                                color: CustomThemeColors.themeWhite,
+                                fontWeight: FontWeight.bold
+                              ),
+                            );
+                          }
                         ),
                         // Text(
                         //   'Remaining Normal Seats: ${context.read<VehicleInfoExtendedProvider>().normalSeatsRemaining}',
@@ -106,12 +111,18 @@ class NextStopBody extends StatelessWidget {
               ),
             );
           } else {
-            return const Padding(
-              padding: EdgeInsets.all(5.0),
-              child: Text(
-                'No Trip Assigned',
-                style: TextStyle(color: CustomThemeColors.themeWhite)
-              )
+            return const SizedBox(
+              width: double.infinity,
+              height: 100,
+              child: Padding(
+                padding: EdgeInsets.all(5.0),
+                child: Center(
+                  child: Text(
+                    'No Trip Assigned',
+                    style: TextStyle(color: CustomThemeColors.themeWhite)
+                  ),
+                )
+              ),
             );
           }
         }

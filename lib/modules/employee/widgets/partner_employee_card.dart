@@ -50,14 +50,20 @@ class PartnerCardBody extends StatelessWidget {
               color: CustomThemeColors.themeBlue,
               borderRadius: BorderRadius.all(Radius.circular(10.0)),
             ),
-            child: Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text(
-                'No Partner Assigned',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                  color: CustomThemeColors.themeWhite,
+            child: SizedBox(
+              width: double.infinity,
+              height: 100,
+              child: Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Center(
+                  child: Text(
+                    'No Partner Assigned',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                      color: CustomThemeColors.themeWhite,
+                    ),
+                  ),
                 ),
               ),
             ),

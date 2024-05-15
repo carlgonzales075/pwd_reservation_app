@@ -27,8 +27,8 @@ class VehicleRouteInfo {
       final vehicleId = data['vehicle_id'];
       final driverId = data['driver_id'];
       final conductorId = data['conductor_id'];
-      final currentStopId = data['current_stop'];
-      final goingToBusStopId = data['going_to_bus_stop'];
+      final currentStopId = data['current_stop'] ?? '';
+      final goingToBusStopId = data['going_to_bus_stop'] ?? '';
       return VehicleRouteInfo(
         routeId, vehicleId, driverId,
         conductorId, currentStopId, goingToBusStopId

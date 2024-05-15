@@ -71,11 +71,17 @@ class VehicleCardBody extends StatelessWidget {
               ),
             );
           } else {
-            return const Padding(
-              padding: EdgeInsets.all(2.0),
-              child: Text(
-                'No vehicle Assigned.',
-                style: TextStyle(color: CustomThemeColors.themeWhite)
+            return const SizedBox(
+              width: double.infinity,
+              height: 100,
+              child: Padding(
+                padding: EdgeInsets.all(2.0),
+                child: Center(
+                  child: Text(
+                    'No vehicle Assigned.',
+                    style: TextStyle(color: CustomThemeColors.themeWhite)
+                  ),
+                ),
               ),
             );
           }
