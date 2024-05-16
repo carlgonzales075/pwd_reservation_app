@@ -274,6 +274,7 @@ class BusCarouselItemDesc extends StatelessWidget {
               buttonText: 'Select ${vehicle.getNestedValue('vehicle_id.vehicle_name')}',
               onPressed: () async {
                 try {
+                  // print('asd dsf');
                   PassengerSeatAssignment seatAssignment = await postSeatReservation(
                     context,
                     context.read<CredentialsProvider>().accessToken as String,
@@ -284,6 +285,7 @@ class BusCarouselItemDesc extends StatelessWidget {
                   );
                   
                   if (context.mounted) {
+                    // print(seatAssignment.seatAssigned);
                     ReservationInfo reservationInfo = await getReservationInfo(
                       context.read<CredentialsProvider>().accessToken as String,
                       seatAssignment.seatAssigned as String,
@@ -291,6 +293,7 @@ class BusCarouselItemDesc extends StatelessWidget {
                     );
 
                     if (context.mounted) {
+                      // print('asd dsf');
                       context.read<ReservationProvider>().initReservation(
                         reservationInfo.seatName,
                         reservationInfo.routeName,
