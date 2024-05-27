@@ -375,11 +375,15 @@ class _BookReservationButtonState extends State<BookReservationButton> {
           final String? seatName = reservation.seatName;
           final int? distance = reservation.distance;
 
-          if (seatName != null) {
+          if (distance != null) {
             // bool visibility = distance != null && distance > 0;
+            if (distance <= 0) {
+              return const RfidInfoCard();
+            } else {
+              return const CancelButton();
+            } 
+          } else if (seatName != null) {
             return const RfidInfoCard();
-          } else if (distance != null) {
-            return const CancelButton();
           } else {
             return const BookReservationButtonInner();
             
