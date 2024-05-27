@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import 'package:pwd_reservation_app/commons/themes/theme_modules.dart';
@@ -44,12 +43,14 @@ class SelectBusScreen extends StatelessWidget {
             );
           }),
           Consumer<StopsProvider>(builder: (context, stops, child) {
+            // print(context.read<PassengerProvider>().passengerType);
             return FutureBuilder<List<Vehicles>>(
             future: postVehicles(
               context.read<CredentialsProvider>().accessToken as String,
               stops.pickupId as String,
               stops.destinationId as String,
-              context.read<DomainProvider>().url as String
+              context.read<DomainProvider>().url as String,
+              context.read<PassengerProvider>().passengerType != 'Normal'
             ),
             builder: (BuildContext context, AsyncSnapshot<List<Vehicles>> snapshot) {
               if (snapshot.hasData) {
@@ -134,7 +135,7 @@ class _BusCarouselSliderGroupState extends State<BusCarouselSliderGroup> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         BusCarousel(
           carouselItems: widget.snapshot.data as List<Vehicles>,
@@ -144,33 +145,12 @@ class _BusCarouselSliderGroupState extends State<BusCarouselSliderGroup> {
           },
           carouselController: _controller1,
         ),
-        BusCarousel(
+        BusCarouselDesc(
           carouselItems: widget.snapshot.data as List<Vehicles>,
           itemBuilder: (context, vehicle) {
             return BusCarouselItemDesc(vehicle: vehicle);
           },
           carouselController: _controller2,
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Visibility(
-            visible: isPrevVisible,
-            child: ElevatedButton(
-              onPressed: () {
-                _controller1.previousPage();
-                _controller2.previousPage();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: CustomThemeColors.themeLightBlue,
-                foregroundColor: CustomThemeColors.themeWhite,
-                minimumSize: const Size.fromHeight(50),
-                textStyle: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                )
-              ),
-              child: const Text('Previous Bus'),
-            ),
-          ),
         ),
         Padding(
           padding: const EdgeInsets.all(8.0),
@@ -262,7 +242,7 @@ class BusCarouselItemDesc extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -285,47 +265,75 @@ class BusCarouselItemDesc extends StatelessWidget {
                   );
                   
                   if (context.mounted) {
-                    // print(seatAssignment.seatAssigned);
-                    ReservationInfo reservationInfo = await getReservationInfo(
-                      context.read<CredentialsProvider>().accessToken as String,
-                      seatAssignment.seatAssigned as String,
-                      context.read<DomainProvider>().url as String
-                    );
-
-                    if (context.mounted) {
-                      // print('asd dsf');
-                      context.read<ReservationProvider>().initReservation(
-                        reservationInfo.seatName,
-                        reservationInfo.routeName,
-                        reservationInfo.vehicleName,
-                        reservationInfo.busStopName,
-                        reservationInfo.distance
-                      );
-                      context.read<PassengerProvider>().assignSeat(
-                        seatAssigned: seatAssignment.seatAssigned as String, 
-                        isWaiting: seatAssignment.isWaiting as bool
-                      );
+                    print(seatAssignment.seatAssigned);
+                    if (seatAssignment.seatAssigned == null) {
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
-                            title: const Text('Booking Successful!'),
-                            content: const Text('You are now booked for a ride!'),
-                            actions: <Widget>[
-                              TextButton(
-                                style: TextButton.styleFrom(
-                                  textStyle: Theme.of(context).textTheme.labelLarge,
+                            title: const Text('No Available Seats'),
+                            content: const Text(
+                              'No available seats for your passenger type. Please select another bus.'
+                            ),
+                            alignment: Alignment.center,
+                            actions: [
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  minimumSize: const Size.fromHeight(50),
+                                  backgroundColor: CustomThemeColors.themeBlue,
+                                  foregroundColor: CustomThemeColors.themeWhite
                                 ),
-                                child: const Text('OK'),
                                 onPressed: () {
                                   Navigator.of(context).pop();
-                                  Navigator.pushNamed(context, '/home');
                                 },
-                              ),
+                                child: const Text('OK')
+                              )
                             ],
                           );
                         }
                       );
+                    } else {
+                      ReservationInfo reservationInfo = await getReservationInfo(
+                        context.read<CredentialsProvider>().accessToken as String,
+                        seatAssignment.seatAssigned as String,
+                        context.read<DomainProvider>().url as String
+                      );
+
+                      if (context.mounted) {
+                        // print('asd dsf');
+                        context.read<ReservationProvider>().initReservation(
+                          reservationInfo.seatName,
+                          reservationInfo.routeName,
+                          reservationInfo.vehicleName,
+                          reservationInfo.busStopName,
+                          reservationInfo.distance
+                        );
+                        context.read<PassengerProvider>().assignSeat(
+                          seatAssigned: seatAssignment.seatAssigned as String, 
+                          isWaiting: seatAssignment.isWaiting as bool
+                        );
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text('Booking Successful!'),
+                              content: const Text('You are now booked for a ride!'),
+                              actions: <Widget>[
+                                TextButton(
+                                  style: TextButton.styleFrom(
+                                    textStyle: Theme.of(context).textTheme.labelLarge,
+                                  ),
+                                  child: const Text('OK'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                    Navigator.pushNamed(context, '/home');
+                                  },
+                                ),
+                              ],
+                            );
+                          }
+                        );
+                      }
                     }
                     
                   }
@@ -339,36 +347,54 @@ class BusCarouselItemDesc extends StatelessWidget {
           RowDesc(
             title: 'Plate Number',
             desc: vehicle.getNestedValue('vehicle_id.vehicle_plate_number'),
-            color: CustomThemeColors.themeBlue
+            color: CustomThemeColors.themeBlue,
+            visible: true,
           ),
           RowDesc(
             title: 'Route',
             desc: vehicle.getNestedValue('route_id.route_name'),
-            color: CustomThemeColors.themeBlue
+            color: CustomThemeColors.themeBlue,
+            visible: true,
           ),
           RowDesc(
             title: 'Current Stop',
             desc: vehicle.getNestedValue('current_stop.stop_name') ?? 'In Transit to ${
               vehicle.getNestedValue('going_to_bus_stop.stop_name')}',
             color: vehicle.getNestedValue('current_stop.stop_name') == null ?
-              Colors.green : CustomThemeColors.themeBlue
+              Colors.green : CustomThemeColors.themeBlue,
+            visible: true,
           ),
           RowDesc(
             title: 'Remaining PWD Seats',
             desc: '${vehicle.getNestedValue('vehicle_id.remaining_pwd_seats')}',
             color: vehicle.getNestedValue('vehicle_id.remaining_pwd_seats') > 0 ? 
-              CustomThemeColors.themeBlue : Colors.red
+              CustomThemeColors.themeBlue : Colors.red,
+            visible: true,
           ),
           RowDesc(
             title: 'Remaining Normal Seats',
             desc: '${vehicle.getNestedValue('vehicle_id.remaining_normal_seats')}',
             color: vehicle.getNestedValue('vehicle_id.remaining_normal_seats') > 0 ? 
-              CustomThemeColors.themeBlue : Colors.red
+              CustomThemeColors.themeBlue : Colors.red,
+            visible: true,
           ),
           RowDesc(
-            title: 'Arriving After:',
+            title: 'Arriving After',
             desc: '${vehicle.getNestedValue('distance')} Bus Stops',
-            color:CustomThemeColors.themeBlue
+            color:CustomThemeColors.themeBlue,
+            visible: true,
+          ),
+          RowDesc(
+            title: 'Fare Amount',
+            desc: 'PHP ${vehicle.getNestedValue('amounts.fare_amount')}',
+            color:vehicle.getNestedValue('amounts.discount') == 0 ? CustomThemeColors.themeBlue : Colors.green,
+            visible: true,
+          ),
+          RowDesc(
+            title: 'PWD/SC Discount',
+            desc: 'PHP ${vehicle.getNestedValue('amounts.discount')}',
+            color:Colors.green,
+            visible: vehicle.getNestedValue('amounts.discount') > 0,
           )
         ],
       )
@@ -381,25 +407,30 @@ class RowDesc extends StatelessWidget {
     super.key,
     required this.title,
     required this.desc,
-    required this.color
+    required this.color,
+    required this.visible
   });
 
   final String title;
   final String desc;
   final Color color;
+  final bool visible;
 
   @override
   Widget build (BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        Text('$title :'),
-        Text(desc, style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color: color
-        ))
-      ],
+    return Visibility(
+      visible: visible,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Text('$title :'),
+          Text(desc, style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: color
+          ))
+        ],
+      ),
     );
   }
 }
@@ -432,7 +463,10 @@ class _BusCarouselDesc extends State<BusCarouselDesc> {
       }).toList(),
       options: CarouselOptions(
         autoPlay: false,
-        viewportFraction: 1
+        viewportFraction: 0.8,
+        enlargeCenterPage: true,
+        enlargeFactor: 1.4,
+        height: 260
       ),
       carouselController: widget.carouselController,
     );

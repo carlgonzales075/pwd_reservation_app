@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-
 class BusOperations {
 
   static Future<String> startTrip (String domain, String accessToken, int id, String dispatchId) async {

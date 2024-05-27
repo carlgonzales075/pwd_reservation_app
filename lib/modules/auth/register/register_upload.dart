@@ -48,7 +48,6 @@ class _UploadScreenState extends State<UploadScreen> {
                   context.read<CredentialsProvider>().accessToken as String,
                   _selectedImages
                 ) as List<String>;
-                // print(imageIds);
                 if (context.mounted) {
                   try {
                     await postImageProcessing(
@@ -69,6 +68,7 @@ class _UploadScreenState extends State<UploadScreen> {
                                 onPressed: () {
                                   Navigator.of(context).pop();
                                   Navigator.of(context).pop();
+                                  // Navigator.of(context).pop();
                                 },
                                 child: const Text('Back')
                               )
@@ -84,7 +84,7 @@ class _UploadScreenState extends State<UploadScreen> {
                         builder: (BuildContext context) {
                           return AlertDialog(
                             title: const Text('Failed Upload'),
-                            content: const Text('An error occurred while uploading.'),
+                            content: Text('An error occurred while uploading. $e'),
                             actions: <Widget>[
                               ElevatedButton(
                                 onPressed: () {

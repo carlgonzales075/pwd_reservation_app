@@ -9,6 +9,7 @@ import 'package:pwd_reservation_app/modules/employee/drivers/screen_change.dart'
 import 'package:pwd_reservation_app/modules/employee/drivers/vehicle_info_extended.dart';
 import 'package:pwd_reservation_app/modules/employee/drivers/vehicle_route_info.dart';
 import 'package:pwd_reservation_app/modules/home/body/booking_info_card.dart';
+import 'package:pwd_reservation_app/modules/home/body/rfid_info_card.dart';
 import 'package:pwd_reservation_app/modules/home/side_menu.dart';
 import 'package:pwd_reservation_app/modules/reservation/drivers/bus_selected.dart';
 import 'package:pwd_reservation_app/modules/reservation/drivers/routes.dart';
@@ -67,79 +68,94 @@ class HomeScreen extends StatelessWidget {
             foregroundColor: CustomThemeColors.themeWhite
           ),
           onPressed: () async {
-            if (context.read<ReservationProvider>().distance != null) {
-              try {
-                final reservation = await getReservationInfo (
-                  context.read<CredentialsProvider>().accessToken as String,
-                  context.read<PassengerProvider>().seatAssigned as String,
-                  context.read<DomainProvider>().url as String
-                );
-                if (context.mounted) {
-                  context.read<ReservationProvider>().initReservation(
-                    reservation.seatName,
-                    reservation.routeName,
-                    reservation.vehicleName,
-                    reservation.busStopName,
-                    reservation.distance
-                  );
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  context.read<ReservationProvider>().resetReservation();
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return const AlertDialog(
-                        title: Text(
-                          'We have arrived!',
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white
-                          ),
-                        ),
-                        content: Column(
-                          children: [
-                            Text(
-                              'Please alight the bus safely.',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.white
-                              ),
-                            ),
-                            Text(
-                              'Do not hesitate to ask assistance.',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.white
-                              ),
-                            )
-                          ],
-                        ),
-                      );
-                    }
-                  );
-                }
-              }
-            } else {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: const Text('No Reservations yet'),
-                    content: const Text('No need to use this button while there are no reservations yet.'),
-                    actionsAlignment: MainAxisAlignment.center,
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: const Text('OK')
-                      )
-                    ],
-                  );
-                }
+            final Passengers updatedPassenger = await getPassenger(
+              context.read<UserProvider>().userId as String,
+              context.read<CredentialsProvider>().accessToken as String,
+              context.read<DomainProvider>().url as String
+            );
+            if (context.mounted) {
+              context.read<PassengerProvider>().initPassenger(
+                id: updatedPassenger.id,
+                passengerType: updatedPassenger.passengerType,
+                disabilityInfo: updatedPassenger.disabilityInfo,
+                seatAssigned: updatedPassenger.seatAssigned,
+                isWaiting: updatedPassenger.isWaiting,
+                isOnRoute: updatedPassenger.isOnRoute
               );
+              if (context.read<ReservationProvider>().distance != null) {
+                try {
+                  final reservation = await getReservationInfo (
+                    context.read<CredentialsProvider>().accessToken as String,
+                    context.read<PassengerProvider>().seatAssigned as String,
+                    context.read<DomainProvider>().url as String
+                  );
+                  if (context.mounted) {
+                    context.read<ReservationProvider>().initReservation(
+                      reservation.seatName,
+                      reservation.routeName,
+                      reservation.vehicleName,
+                      reservation.busStopName,
+                      reservation.distance
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    context.read<ReservationProvider>().resetReservation();
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return const AlertDialog(
+                          title: Text(
+                            'We have arrived!',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white
+                            ),
+                          ),
+                          content: Column(
+                            children: [
+                              Text(
+                                'Please alight the bus safely.',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.white
+                                ),
+                              ),
+                              Text(
+                                'Do not hesitate to ask assistance.',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.white
+                                ),
+                              )
+                            ],
+                          ),
+                        );
+                      }
+                    );
+                  }
+                }
+              } else {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text('No Reservations yet'),
+                      content: const Text('No need to use this button while there are no reservations yet.'),
+                      actionsAlignment: MainAxisAlignment.center,
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: const Text('OK')
+                        )
+                      ],
+                    );
+                  }
+                );
+              }
             }
           },
           child: const Text('Refresh Bus Location')
@@ -237,7 +253,12 @@ class HomeScreenNameCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              const ProfilePicture(),
+              GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, "/edit-profile");
+                },
+                child: const ProfilePicture()
+              ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
@@ -281,7 +302,7 @@ class ProfilePicture extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const ApiProfileImage();
+    return const ApiProfileImage(width: 40, height: 40, scale: true,);
   }
 }
 
@@ -334,35 +355,71 @@ class HomeScreenBody extends StatelessWidget {
   }
 }
 
-class BookReservationButton extends StatelessWidget {
+class BookReservationButton extends StatefulWidget {
   const BookReservationButton({
     super.key,
   });
 
   @override
+  State<BookReservationButton> createState() => _BookReservationButtonState();
+}
+
+class _BookReservationButtonState extends State<BookReservationButton> {
+  @override
   Widget build(BuildContext context) {
-    if (context.read<PassengerProvider>().seatAssigned == null) {
-      return const BookReservationButtonInner();
-    } else {
-      int distance;
-      if (context.read<ReservationProvider>().seatName != null) {
-        distance = context.read<ReservationProvider>().distance as int;
-        bool visibility = distance > 0;
-        return Visibility(
-          visible: visibility,
-          child: const CancelButton(),
-        );
-        
-      } else {
-        if (context.read<ReservationProvider>().distance != null) {
-          return const CancelButton();
-        } else {
+    return Consumer2<PassengerProvider, ReservationProvider>(
+      builder: (context, passenger, reservation, child) {
+        if (passenger.seatAssigned == null) {
           return const BookReservationButtonInner();
+        } else {
+          final String? seatName = reservation.seatName;
+          final int? distance = reservation.distance;
+
+          if (seatName != null) {
+            // bool visibility = distance != null && distance > 0;
+            return const RfidInfoCard();
+          } else if (distance != null) {
+            return const CancelButton();
+          } else {
+            return const BookReservationButtonInner();
+            
+          }
         }
-      }
-    }
+      },
+    );
   }
 }
+
+
+// class _BookReservationButtonState extends State<BookReservationButton> {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Consumer2<PassengerProvider, ReservationProvider>(
+//       builder: (context, passenger, reservation, child),
+//     ) {
+//       if (passenger.seatAssigned == null) {
+//         return const BookReservationButtonInner();
+//       } else {
+//         int distance;
+//         if (context.read<ReservationProvider>().seatName != null) {
+//           distance = context.read<ReservationProvider>().distance as int;
+//           bool visibility = distance > 0;
+//           return Visibility(
+//             visible: visibility,
+//             child: const CancelButton(),
+//           );
+          
+//         } else {
+//           if (context.read<ReservationProvider>().distance != null) {
+//             return const CancelButton();
+//           } else {
+//             return const BookReservationButtonInner();
+//           }
+//         }
+//       }
+//     }
+//   }
+// }
 
 class BookReservationButtonInner extends StatelessWidget {
   const BookReservationButtonInner({
@@ -411,6 +468,35 @@ class CancelButton extends StatelessWidget {
                   onPressed: () {
                     cancel = true;
                     Navigator.of(context).pop();
+                    if (cancel) {
+                      cancelBooking(context.read<CredentialsProvider>().accessToken as String,
+                        context.read<PassengerProvider>().id as String,
+                        context.read<PassengerProvider>().seatAssigned as String,
+                        context.read<DomainProvider>().url as String
+                      );
+                      context.read<ReservationProvider>().resetReservation();
+                      context.read<PassengerProvider>().aloftSeat();
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Cancelled Reservation'),
+                            content: const Text('You\'re cancellation is complete.'),
+                            actions: <Widget>[
+                              TextButton(
+                                style: TextButton.styleFrom(
+                                  textStyle: Theme.of(context).textTheme.labelLarge,
+                                ),
+                                child: const Text('OK'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ],
+                          );
+                        }
+                      );
+                    }
                   },
                   child: const Text('Confirm')
                 )
@@ -418,36 +504,6 @@ class CancelButton extends StatelessWidget {
             );
           }
         );
-        if (cancel) {
-          cancelBooking(context.read<CredentialsProvider>().accessToken as String,
-            context.read<PassengerProvider>().id as String,
-            context.read<PassengerProvider>().seatAssigned as String,
-            context.read<DomainProvider>().url as String
-          );
-          context.read<ReservationProvider>().resetReservation();
-          context.read<PassengerProvider>().aloftSeat();
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: const Text('Cancelled Reservation'),
-                content: const Text('You\'re cancellation is complete.'),
-                actions: <Widget>[
-                  TextButton(
-                    style: TextButton.styleFrom(
-                      textStyle: Theme.of(context).textTheme.labelLarge,
-                    ),
-                    child: const Text('OK'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      Navigator.pushNamed(context, '/home');
-                    },
-                  ),
-                ],
-              );
-            }
-          );
-        }
       },
       style: ElevatedButton.styleFrom(
             backgroundColor: Theme.of(context).colorScheme.onError,

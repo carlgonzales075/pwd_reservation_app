@@ -18,6 +18,7 @@ import 'package:pwd_reservation_app/modules/reservation/drivers/routes.dart';
 import 'package:pwd_reservation_app/modules/reservation/reservation.dart';
 import 'package:pwd_reservation_app/modules/reservation/select_bus.dart';
 import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
+import 'package:pwd_reservation_app/modules/users/edit_profile.dart';
 // import 'package:camera/camera.dart';
 
 // late List<CameraDescription> _cameras;
@@ -74,21 +75,22 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
    // This widget is the root of your application.
-   @override 
-   Widget build(BuildContext context) {
+  @override 
+  Widget build(BuildContext context) {
       // context.read<CameraProvider>().updateCameras(_cameras);
-      return MaterialApp( 
-        theme: ThemeData(primarySwatch: Colors.blue), 
-        routes: <String, WidgetBuilder> {
-          "/": (BuildContext context) => const MainAuthScreen(),
-          "/employee-home": (BuildContext context) => const EmployeeHomeScreen(),
-          "/register": (BuildContext context) => const RegisterAuthScreen(),
-          "/register-upload": (BuildContext context) => const UploadScreen(),
-          "/home": (BuildContext context) => const HomeScreen(),
-          "/reservation": (BuildContext context) => const ReservationScreen(),
-          "/select-bus": (BuildContext context) => const SelectBusScreen(),
-          "/domain": (BuildContext context) => const DomainScreen()
-        }
-      ); 
-   } 
+    return MaterialApp( 
+      theme: ThemeData(primarySwatch: Colors.blue), 
+      routes: <String, WidgetBuilder> {
+        "/": (BuildContext context) => const MainAuthScreen(),
+        "/employee-home": (BuildContext context) => const EmployeeHomeScreen(),
+        "/register": (BuildContext context) => const RegisterAuthScreen(),
+        "/register-upload": (BuildContext context) => const UploadScreen(),
+        "/home": (BuildContext context) => const HomeScreen(),
+        "/reservation": (BuildContext context) => const ReservationScreen(),
+        "/select-bus": (BuildContext context) => const SelectBusScreen(),
+        "/domain": (BuildContext context) => const DomainScreen(),
+        "/edit-profile": (BuildContext context) => const EditProfileScreen()
+      }
+    ); 
+  }
 } 

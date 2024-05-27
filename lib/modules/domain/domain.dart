@@ -43,9 +43,13 @@ class _DomainForm extends State<DomainForm> {
             TextField(
               controller: ipText,
               decoration: const InputDecoration(
-                hintText: "Enter IP Address",
+                hintText: "Enter IP Address for Prototype testing",
                 alignLabelWithHint: true,
+                labelText: 'IP Address',
                 contentPadding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide()
+                )
               ),
               textAlign: TextAlign.center,
             ),

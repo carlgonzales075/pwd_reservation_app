@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:http_parser/http_parser.dart';
+import 'package:pwd_reservation_app/modules/users/utils/upload_image.dart';
 
 class DirectusFile {
   String? id;
@@ -31,10 +31,77 @@ class DirectusFileList {
 }
 
 
+// Future<dynamic> uploadImages(String domain, String accessToken, List<File?> selectedImage) async {
+//   // Filter out null entries (unselected images)
+//   List<File> selectedFiles =
+//       selectedImage.where((image) => image != null).map((image) => image!).toList();
+
+//   if (selectedFiles.isEmpty) {
+//     // No images selected
+//     throw Exception('No files prepared for upload.');
+//   }
+
+//   // Send images to API endpoint
+//   String apiUrl = '$domain/files';
+//   var request = http.MultipartRequest(
+//     'POST',
+//     Uri.parse(apiUrl)
+//   );
+
+//   request.headers['Authorization'] = 'Bearer $accessToken';
+
+//   for (var file in selectedFiles) {
+//     String fileName = file.path.split('/').last;
+
+//     String contentType = 'image/jpeg'; // Default to JPEG for example
+//     if (fileName.toLowerCase().endsWith('.png')) {
+//       contentType = 'image/png';
+//     } else if (fileName.toLowerCase().endsWith('.gif')) {
+//       contentType = 'image/gif';
+//     } else if (fileName.toLowerCase().endsWith('.jpg') 
+//                 || fileName.toLowerCase().endsWith('.jpeg')) {
+//       contentType = 'image/jpeg';
+//     }
+
+//     request.files.add(http.MultipartFile(
+//       'images',
+//       file.readAsBytes().asStream(),
+//       file.lengthSync(),
+//       filename: fileName,
+//       contentType: MediaType.parse(contentType)
+//     ));
+//   }
+
+//   try {
+//     final streamedResponse = await request.send();
+//     final response = await http.Response.fromStream(streamedResponse);
+//     if (response.statusCode == 200) {
+//       final List<dynamic> data = jsonDecode(response.body)['data'];
+
+//       // Initialize an empty list to store the IDs
+//       List<String> ids = [];
+
+//       // Iterate over each map in the data list
+//       for (var item in data) {
+//         // Extract the 'id' field from the map and add it to the ids list
+//         String id = item['id'].toString(); // Assuming 'id' is a String in the map
+//         ids.add(id);
+//       }
+
+//       // Return the list of IDs
+//       return ids;
+//       // return DirectusFileList.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+//     } else {
+//       throw Exception('Parsing of Image ID failed.');
+//     }
+//   } catch (e) {
+//     throw Exception('Error uploading images: $e');
+//   }
+// }
+
 Future<dynamic> uploadImages(String domain, String accessToken, List<File?> selectedImage) async {
   // Filter out null entries (unselected images)
-  List<File> selectedFiles =
-      selectedImage.where((image) => image != null).map((image) => image!).toList();
+  List<File> selectedFiles = selectedImage.where((image) => image != null).map((image) => image!).toList();
 
   if (selectedFiles.isEmpty) {
     // No images selected
@@ -43,57 +110,17 @@ Future<dynamic> uploadImages(String domain, String accessToken, List<File?> sele
 
   // Send images to API endpoint
   String apiUrl = '$domain/files';
-  var request = http.MultipartRequest(
-    'POST',
-    Uri.parse(apiUrl)
-  );
-
+  var request = http.MultipartRequest('POST', Uri.parse(apiUrl));
   request.headers['Authorization'] = 'Bearer $accessToken';
 
-  for (var file in selectedFiles) {
-    String fileName = file.path.split('/').last;
+  final List<String> ids = [];
 
-    String contentType = 'image/jpeg'; // Default to JPEG for example
-    if (fileName.toLowerCase().endsWith('.png')) {
-      contentType = 'image/png';
-    } else if (fileName.toLowerCase().endsWith('.gif')) {
-      contentType = 'image/gif';
-    } // Add more checks for other image formats as needed
-
-    request.files.add(http.MultipartFile(
-      'images',
-      file.readAsBytes().asStream(),
-      file.lengthSync(),
-      filename: fileName,
-      contentType: MediaType.parse(contentType)
-    ));
+  for (int index = 0; index < selectedFiles.length; index++) {
+    var file = selectedFiles[index];
+    String? id = await SimpleImage.uploadImage(domain, accessToken, file);
+    ids.add(id.toString());
   }
-
-  try {
-    final streamedResponse = await request.send();
-    final response = await http.Response.fromStream(streamedResponse);
-    if (response.statusCode == 200) {
-      final List<dynamic> data = jsonDecode(response.body)['data'];
-
-      // Initialize an empty list to store the IDs
-      List<String> ids = [];
-
-      // Iterate over each map in the data list
-      for (var item in data) {
-        // Extract the 'id' field from the map and add it to the ids list
-        String id = item['id'].toString(); // Assuming 'id' is a String in the map
-        ids.add(id);
-      }
-
-      // Return the list of IDs
-      return ids;
-      // return DirectusFileList.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
-    } else {
-      throw Exception('Parsing of Image ID failed.');
-    }
-  } catch (e) {
-    throw Exception('Error uploading images: $e');
-  }
+  return ids;
 }
 
 class IdProcessing {

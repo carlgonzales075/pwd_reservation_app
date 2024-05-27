@@ -148,7 +148,7 @@ class Vehicles {
 }
 
 Future<List<Vehicles>> postVehicles(
-  String accessToken, String pickupId, String destinationId, String domain
+  String accessToken, String pickupId, String destinationId, String domain, bool isPwd
   ) async {
   var url = Uri.parse('$domain/flows/trigger/5d1a6ed4-3ff6-4e53-a8f2-1852ec6cef63');
   try {
@@ -158,13 +158,17 @@ Future<List<Vehicles>> postVehicles(
         "Authorization": "Bearer $accessToken",
         "Content-type": "application/json"
       },
-      body: jsonEncode(<String, String> {
+      body: jsonEncode(<String, dynamic> {
         "occupied_from": pickupId,
-        "occupied_to": destinationId
+        "occupied_to": destinationId,
+        "is_pwd": isPwd
       })
     );
+    // print('issue here?');
     if (response.statusCode == 200) {
+      // print('issue here');
       final List<dynamic> responseData = json.decode(response.body)['data'];
+      // print('issue here?');
       return responseData.map((e) => Vehicles.fromJson(e)).toList();
     } else {
       Map<String, dynamic> responseData = jsonDecode(response.body);
@@ -179,6 +183,6 @@ Future<List<Vehicles>> postVehicles(
       }
     }
   } catch (e) {
-    throw Exception('asd ${e.toString()}');
+    throw Exception('Error on postVehicle: ${e.toString()}');
   }
 }

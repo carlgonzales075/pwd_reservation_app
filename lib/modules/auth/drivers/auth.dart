@@ -115,6 +115,13 @@ class UserProvider extends ChangeNotifier {
     this.role = role;
     notifyListeners();
   }
+
+  void updateAvatar(
+    String avatar
+  ) {
+    this.avatar = avatar;
+    notifyListeners();
+  }
 }
   //Need to remove this from this class and then update login to await this function prior to moving to the home screen.
 Future<User> getUser(String accessToken, String domain) async {
