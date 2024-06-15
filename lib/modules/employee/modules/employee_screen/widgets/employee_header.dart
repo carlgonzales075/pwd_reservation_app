@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pwd_reservation_app/commons/themes/theme_modules.dart';
-import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
 import 'package:pwd_reservation_app/modules/home/home_screen.dart';
+import 'package:pwd_reservation_app/modules/users/utils/users.dart';
 
 class EmployeeHomeScreenHeader extends StatelessWidget {
   const EmployeeHomeScreenHeader({super.key});
@@ -20,22 +20,6 @@ class EmployeeHomeScreenHeader extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //   crossAxisAlignment: CrossAxisAlignment.center,
-            //   children: <Widget>[
-            //     IconButton(
-            //       onPressed: () {
-            //         Navigator.pushNamed(context, "/domain");
-            //       },
-            //       icon: const Icon(
-            //         Icons.menu,
-            //         color: CustomThemeColors.themeWhite,
-            //       )
-            //     ),
-            //     const LogOutButton()
-            //   ],
-            // ),
             EmployeeHomeScreenNameCard()
           ],
         ),

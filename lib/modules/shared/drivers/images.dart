@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:pwd_reservation_app/commons/themes/theme_modules.dart';
-import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
 import 'package:provider/provider.dart';
-import 'package:pwd_reservation_app/modules/employee/drivers/partner_employee.dart';
+import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/drivers/partner_employee.dart';
 import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
-// import 'package:flutter/services.dart';
-// import 'package:image/image.dart' as image;
+import 'package:pwd_reservation_app/modules/users/utils/users.dart';
 
 class ApiProfileImage extends StatefulWidget {
   const ApiProfileImage({
@@ -85,6 +83,54 @@ class _EditProfileImage extends State<EditProfileImage> {
               image: DecorationImage(
                 image: userProvider.avatar != null ? NetworkImage(
                   '$domain/assets/${userProvider.avatar}?fit=cover&width=${widget.width}&height=${widget.height}'
+                ) : AssetImage(assetImage) as ImageProvider,
+                fit: BoxFit.cover,
+              ),
+              shape: BoxShape.circle,
+            ),
+          ),
+        );
+      }
+    );
+  }
+}
+
+class PassengerImage extends StatefulWidget {
+  const PassengerImage({
+    super.key,
+    required this.width,
+    required this.height,
+    required this.scale,
+    required this.imageUrl
+  });
+
+  final double width;
+  final double height;
+  final bool scale;
+  final String? imageUrl;
+
+  @override
+  // ignore: library_private_types_in_public_api
+  State<PassengerImage> createState() => _PassengerImage();
+}
+
+class _PassengerImage extends State<PassengerImage> {
+  @override
+  Widget build (BuildContext context) {
+    String domain = context.read<DomainProvider>().url as String;
+    // String assetImage = widget.scale ? 'assets/images/profileIcon100.jpg': 'assets/images/profileIcon.jpg';
+    String assetImage = 'assets/images/profileIcon100.jpg';
+    return Consumer<UserProvider>(
+      builder: (context, userProvider, child) {
+        return CircleAvatar(
+          radius: 30,
+          backgroundColor: CustomThemeColors.themeGrey,
+          child: Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                // image: AssetImage(assetImage) as ImageProvider,
+                image: widget.imageUrl != null ? NetworkImage(
+                  '$domain/assets/${widget.imageUrl}?fit=cover&width=${widget.width}&height=${widget.height}'
                 ) : AssetImage(assetImage) as ImageProvider,
                 fit: BoxFit.cover,
               ),
@@ -192,8 +238,8 @@ class _BusImageProfile extends State<BusImageProfile> {
         return Padding(
           padding: const EdgeInsets.all(5.0),  // Add padding of 10 pixels on all sides
           child: Container(
-            width: 90,  // Set width to 100 pixels
-            height: 90,  // Set height to 100 pixels
+            width: 100,  // Set width to 100 pixels
+            height: 130,  // Set height to 100 pixels
             decoration: BoxDecoration(
               image: DecorationImage(
                 image: NetworkImage(

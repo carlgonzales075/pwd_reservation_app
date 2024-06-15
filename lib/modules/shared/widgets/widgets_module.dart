@@ -126,11 +126,9 @@ class BasicElevatedButton extends StatelessWidget {
   const BasicElevatedButton({
     super.key,
     required this.buttonText,
-    required this.onPressed,
-    this.backgroundColor
+    required this.onPressed
   });
 
-  final CustomThemeColors? backgroundColor;
   final String buttonText;
   final VoidCallback onPressed;
 

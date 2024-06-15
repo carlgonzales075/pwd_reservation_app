@@ -1,21 +1,16 @@
 import 'package:flutter/material.dart';
-// import 'package:pwd_reservation_app/modules/home/footer_menu/footer_menu.dart';
 import 'package:pwd_reservation_app/commons/themes/theme_modules.dart';
 import 'package:provider/provider.dart';
 import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
-import 'package:pwd_reservation_app/modules/employee/drivers/dispatch_info.dart';
-import 'package:pwd_reservation_app/modules/employee/drivers/partner_employee.dart';
-import 'package:pwd_reservation_app/modules/employee/drivers/screen_change.dart';
-import 'package:pwd_reservation_app/modules/employee/drivers/vehicle_info_extended.dart';
-import 'package:pwd_reservation_app/modules/employee/drivers/vehicle_route_info.dart';
-import 'package:pwd_reservation_app/modules/home/body/booking_info_card.dart';
-import 'package:pwd_reservation_app/modules/home/body/rfid_info_card.dart';
-import 'package:pwd_reservation_app/modules/home/side_menu.dart';
-import 'package:pwd_reservation_app/modules/reservation/drivers/bus_selected.dart';
-import 'package:pwd_reservation_app/modules/reservation/drivers/routes.dart';
-import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
+import 'package:pwd_reservation_app/modules/home/widgets/booking_info_card.dart';
+import 'package:pwd_reservation_app/modules/home/widgets/rfid_info_card.dart';
+import 'package:pwd_reservation_app/modules/home/widgets/side_menu.dart';
+import 'package:pwd_reservation_app/modules/reservation/drivers/passengers.dart';
+import 'package:pwd_reservation_app/modules/reservation/drivers/reservations.dart';
+import 'package:pwd_reservation_app/modules/reservation/drivers/seat_assignment.dart';
 import 'package:pwd_reservation_app/modules/shared/drivers/images.dart';
 import 'package:pwd_reservation_app/modules/shared/widgets/widgets_module.dart';
+import 'package:pwd_reservation_app/modules/users/utils/users.dart';
 
 
 class HomeScreen extends StatelessWidget {
@@ -30,20 +25,8 @@ class HomeScreen extends StatelessWidget {
         actions: <Widget>[
           IconButton(
             onPressed: () {
-              logOut(
-                context.read<CredentialsProvider>().refreshToken,
-                context.read<DomainProvider>().url as String
-              );
-              context.read<CredentialsProvider>().resetValues();
-              context.read<StopsProvider>().resetValues();
-              context.read<PassengerProvider>().resetPassenger();
-              context.read<ReservationProvider>().resetReservation();
-              context.read<EmployeeScreenSwitcher>().resetSwitcher();
-              context.read<PartnerEmployeeProvider>().resetValues();
-              context.read<VehicleRouteInfoProvider>().resetVehicleRouteInfo();
-              context.read<DispatchInfoProvider>().resetDispatchInfo();
-              context.read<VehicleInfoExtendedProvider>().resetVehicleInfoExtended();
-              Navigator.pushNamed(context, '/');
+              DirectusAuth directusAuth = DirectusAuth(context);
+              directusAuth.logOutDialog(context);
             },
             icon: const Icon(Icons.logout)
           )
@@ -68,11 +51,8 @@ class HomeScreen extends StatelessWidget {
             foregroundColor: CustomThemeColors.themeWhite
           ),
           onPressed: () async {
-            final Passengers updatedPassenger = await getPassenger(
-              context.read<UserProvider>().userId as String,
-              context.read<CredentialsProvider>().accessToken as String,
-              context.read<DomainProvider>().url as String
-            );
+            //Refactor to another file
+            final Passengers updatedPassenger = await Passengers.getPassenger(context);
             if (context.mounted) {
               context.read<PassengerProvider>().initPassenger(
                 id: updatedPassenger.id,
@@ -84,11 +64,8 @@ class HomeScreen extends StatelessWidget {
               );
               if (context.read<ReservationProvider>().distance != null) {
                 try {
-                  final reservation = await getReservationInfo (
-                    context.read<CredentialsProvider>().accessToken as String,
-                    context.read<PassengerProvider>().seatAssigned as String,
-                    context.read<DomainProvider>().url as String
-                  );
+                  final reservation = await getReservationInfo(
+                    context, context.read<PassengerProvider>().seatAssigned as String);
                   if (context.mounted) {
                     context.read<ReservationProvider>().initReservation(
                       reservation.seatName,
@@ -161,9 +138,6 @@ class HomeScreen extends StatelessWidget {
           child: const Text('Refresh Bus Location')
         )
       ],
-      // bottomNavigationBar: BottomAppBar(
-      //   child: FooterMenu(),
-      // ),
     );
   }
 }
@@ -184,22 +158,6 @@ class HomeScreenHeader extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //   crossAxisAlignment: CrossAxisAlignment.center,
-            //   children: <Widget>[
-            //     IconButton(
-            //       onPressed: () {
-            //         Navigator.pushNamed(context, "/domain");
-            //       },
-            //       icon: const Icon(
-            //         Icons.menu,
-            //         color: CustomThemeColors.themeWhite,
-            //       )
-            //     ),
-            //     const LogOutButton()
-            //   ],
-            // ),
             HomeScreenNameCard()
           ],
         ),
@@ -219,17 +177,8 @@ class LogOutButton extends StatelessWidget {
       builder: (context, credentials, child) {
       return IconButton(
       onPressed: () {
-        logOut(credentials.refreshToken, context.read<DomainProvider>().url as String);
-        credentials.resetValues();
-        context.read<StopsProvider>().resetValues();
-        context.read<PassengerProvider>().resetPassenger();
-        context.read<ReservationProvider>().resetReservation();
-        context.read<EmployeeScreenSwitcher>().resetSwitcher();
-        context.read<PartnerEmployeeProvider>().resetValues();
-        context.read<VehicleRouteInfoProvider>().resetVehicleRouteInfo();
-        context.read<DispatchInfoProvider>().resetDispatchInfo();
-        context.read<VehicleInfoExtendedProvider>().resetVehicleInfoExtended();
-        Navigator.pushNamed(context, '/');
+        DirectusAuth directusAuth = DirectusAuth(context);
+        directusAuth.logOut(credentials.refreshToken);
       },
       icon: const Icon(
         Icons.logout,
@@ -302,7 +251,11 @@ class ProfilePicture extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const ApiProfileImage(width: 40, height: 40, scale: true,);
+    return const ApiProfileImage(
+      width: 40,
+      height: 40,
+      scale: true
+    );
   }
 }
 
@@ -376,7 +329,6 @@ class _BookReservationButtonState extends State<BookReservationButton> {
           final int? distance = reservation.distance;
 
           if (distance != null) {
-            // bool visibility = distance != null && distance > 0;
             if (distance <= 0) {
               return const RfidInfoCard();
             } else {
@@ -393,37 +345,6 @@ class _BookReservationButtonState extends State<BookReservationButton> {
     );
   }
 }
-
-
-// class _BookReservationButtonState extends State<BookReservationButton> {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Consumer2<PassengerProvider, ReservationProvider>(
-//       builder: (context, passenger, reservation, child),
-//     ) {
-//       if (passenger.seatAssigned == null) {
-//         return const BookReservationButtonInner();
-//       } else {
-//         int distance;
-//         if (context.read<ReservationProvider>().seatName != null) {
-//           distance = context.read<ReservationProvider>().distance as int;
-//           bool visibility = distance > 0;
-//           return Visibility(
-//             visible: visibility,
-//             child: const CancelButton(),
-//           );
-          
-//         } else {
-//           if (context.read<ReservationProvider>().distance != null) {
-//             return const CancelButton();
-//           } else {
-//             return const BookReservationButtonInner();
-//           }
-//         }
-//       }
-//     }
-//   }
-// }
 
 class BookReservationButtonInner extends StatelessWidget {
   const BookReservationButtonInner({
@@ -451,6 +372,7 @@ class CancelButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: () {
         bool cancel = false;
+        //refactor this with customDialog
         showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -473,10 +395,9 @@ class CancelButton extends StatelessWidget {
                     cancel = true;
                     Navigator.of(context).pop();
                     if (cancel) {
-                      cancelBooking(context.read<CredentialsProvider>().accessToken as String,
+                      cancelBooking(context,
                         context.read<PassengerProvider>().id as String,
-                        context.read<PassengerProvider>().seatAssigned as String,
-                        context.read<DomainProvider>().url as String
+                        context.read<PassengerProvider>().seatAssigned as String
                       );
                       context.read<ReservationProvider>().resetReservation();
                       context.read<PassengerProvider>().aloftSeat();

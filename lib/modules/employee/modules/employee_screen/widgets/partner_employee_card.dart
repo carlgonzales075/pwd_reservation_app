@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pwd_reservation_app/commons/themes/theme_modules.dart';
 import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
-import 'package:pwd_reservation_app/modules/employee/drivers/partner_employee.dart';
-import 'package:pwd_reservation_app/modules/employee/drivers/vehicle_info_extended.dart';
+import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/drivers/partner_employee.dart';
+import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/drivers/vehicle_info_extended.dart';
 import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
 import 'package:pwd_reservation_app/modules/shared/drivers/images.dart';
+import 'package:pwd_reservation_app/modules/users/utils/users.dart';
 
 class PartnerCardBody extends StatelessWidget {
   const PartnerCardBody({super.key});
@@ -28,7 +29,6 @@ class PartnerCardBody extends StatelessWidget {
         final partnerUser = await getPartnerUser(domain, accessToken, partnerId);
         return partnerUser;
       } catch (e) {
-        print('Error fetching partner user: $e');
         return null;
       }
     }
@@ -70,14 +70,13 @@ class PartnerCardBody extends StatelessWidget {
           );
         } else {
           final partnerEmployee = snapshot.data!;
-          context.read<PartnerEmployeeProvider>().initEmployee(
-            // partnerEmployee.userId,
-            partnerEmployee.firstName,
-            partnerEmployee.lastName,
-            partnerEmployee.avatar,
-            // partnerEmployee.email,
-            // partnerEmployee.role,
-          );
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            context.read<PartnerEmployeeProvider>().initEmployee(
+              partnerEmployee.firstName,
+              partnerEmployee.lastName,
+              partnerEmployee.avatar,
+            );
+          });
           return DecoratedBox(
               decoration: const BoxDecoration(
                 color: CustomThemeColors.themeBlue,

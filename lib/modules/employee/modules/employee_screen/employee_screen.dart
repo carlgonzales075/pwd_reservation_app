@@ -2,24 +2,41 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pwd_reservation_app/commons/themes/theme_modules.dart';
 import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
-import 'package:pwd_reservation_app/modules/employee/drivers/dispatch_info.dart';
-import 'package:pwd_reservation_app/modules/employee/drivers/employee.dart';
-import 'package:pwd_reservation_app/modules/employee/drivers/partner_employee.dart';
-import 'package:pwd_reservation_app/modules/employee/drivers/screen_change.dart';
-import 'package:pwd_reservation_app/modules/employee/drivers/vehicle_info_extended.dart';
-import 'package:pwd_reservation_app/modules/employee/drivers/vehicle_route_info.dart';
-import 'package:pwd_reservation_app/modules/employee/widgets/employee_header.dart';
-import 'package:pwd_reservation_app/modules/employee/widgets/next_stop_card_employee.dart';
-import 'package:pwd_reservation_app/modules/employee/widgets/partner_employee_card.dart';
-import 'package:pwd_reservation_app/modules/employee/widgets/vehicle_card_employee.dart';
-import 'package:pwd_reservation_app/modules/home/side_menu.dart';
+import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/drivers/dispatch_info.dart';
+import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/drivers/employee.dart';
+import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/drivers/partner_employee.dart';
+import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/drivers/vehicle_info_extended.dart';
+import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/drivers/vehicle_route_info.dart';
+import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/widgets/employee_header.dart';
+import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/widgets/next_stop_card_employee.dart';
+import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/widgets/notif_modal.dart';
+import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/widgets/partner_employee_card.dart';
+import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/widgets/vehicle_card_employee.dart';
+import 'package:pwd_reservation_app/modules/employee/modules/inspect_seats/drivers/last_update.dart';
+import 'package:pwd_reservation_app/modules/home/widgets/side_menu.dart';
 import 'package:pwd_reservation_app/modules/reservation/drivers/bus_operations.dart';
-import 'package:pwd_reservation_app/modules/reservation/drivers/bus_selected.dart';
-import 'package:pwd_reservation_app/modules/reservation/drivers/routes.dart';
 import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
+import 'package:pwd_reservation_app/modules/users/utils/users.dart';
 
-class EmployeeHomeScreen extends StatelessWidget {
+class EmployeeHomeScreen extends StatefulWidget {
   const EmployeeHomeScreen({super.key});
+
+  @override
+  State<EmployeeHomeScreen> createState() => _EmployeeHomeScreenState();
+}
+
+class _EmployeeHomeScreenState extends State<EmployeeHomeScreen> {
+  @override
+  void initState() {
+    context.read<LastUpdateProvider>().startPeriodicUpdates(context);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    context.read<LastUpdateProvider>().stopPeriodicUpdates(context);
+    super.dispose();
+  }
 
   @override
   Widget build (BuildContext context) {
@@ -31,45 +48,44 @@ class EmployeeHomeScreen extends StatelessWidget {
         actions: <Widget>[
           IconButton(
             onPressed: () {
-              logOut(
-                context.read<CredentialsProvider>().refreshToken,
-                context.read<DomainProvider>().url as String
-              );
-              context.read<CredentialsProvider>().resetValues();
-              context.read<StopsProvider>().resetValues();
-              context.read<PassengerProvider>().resetPassenger();
-              context.read<ReservationProvider>().resetReservation();
-              context.read<EmployeeScreenSwitcher>().resetSwitcher();
-              context.read<PartnerEmployeeProvider>().resetValues();
-              context.read<VehicleRouteInfoProvider>().resetVehicleRouteInfo();
-              context.read<DispatchInfoProvider>().resetDispatchInfo();
-              context.read<VehicleInfoExtendedProvider>().resetVehicleInfoExtended();
-              Navigator.pushNamed(context, '/');
+              DirectusAuth directusAuth = DirectusAuth(context);
+              directusAuth.logOutDialog(context);
             },
             icon: const Icon(Icons.logout)
           )
         ],
       ),
       drawer: const NavDrawer(),
-      body: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints viewPortConstraints) {
-          return SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: viewPortConstraints.maxHeight,
+      body: Stack(
+        children: [
+          LayoutBuilder(
+            builder: (BuildContext context, BoxConstraints viewPortConstraints) {
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: viewPortConstraints.maxHeight,
+                  ),
+                  child: const Column(
+                    children: <Widget>[
+                    EmployeeHomeScreenHeader(),
+                    PartnerCard(),
+                    SizedBox(height: 2,),
+                    VehicleCard(),
+                    SizedBox(height: 2),
+                    NextStopCard(),
+                  ],
+                ),)
+              );
+            }
+          ),
+          if (context.read<LastUpdateProvider>().showNotif as bool)
+            const Align(
+              alignment: Alignment.topCenter,
+              child: NotifModal(
+                id: 'notif1'
               ),
-              child: const Column(
-                children: <Widget>[
-                EmployeeHomeScreenHeader(),
-                PartnerCard(),
-                SizedBox(height: 12,),
-                VehicleCard(),
-                SizedBox(height: 12),
-                NextStopCard(),
-              ],
-            ),)
-          );
-        }
+            )
+        ],
       ),
       persistentFooterButtons: const <Widget>[
         DynamicButtons()
@@ -77,187 +93,6 @@ class EmployeeHomeScreen extends StatelessWidget {
     );
   }
 }
-
-// class DynamicButtons extends StatefulWidget {
-//   const DynamicButtons({
-//     super.key,
-//   });
-
-//   @override
-//   State<DynamicButtons> createState() => _DynamicButtonsState();
-// }
-
-// class _DynamicButtonsState extends State<DynamicButtons> {
-//   int getRemainingStops(List<dynamic> items) {
-//   // Filtering the list based on the condition
-//     List filteredItems = items.where((item) {
-//       if (item is Map<String, dynamic>) {
-//         return item['arrival_datetime'] == null && item['departure_datetime'] == null;
-//       }
-//       return false;
-//     }).toList();
-
-//     // Returning the length of the filtered list
-//     return filteredItems.length;
-//   }
-
-//   int getRemainingStopsbyArrival(List<dynamic> items) {
-//   // Filtering the list based on the condition
-//     List filteredItems = items.where((item) {
-//       if (item is Map<String, dynamic>) {
-//         return item['arrival_datetime'] == null;
-//       }
-//       return false;
-//     }).toList();
-
-//     // Returning the length of the filtered list
-//     return filteredItems.length;
-//   }
-
-//   int getRemainingStopsbyDeparture(List<dynamic> items) {
-//   // Filtering the list based on the condition
-//     List filteredItems = items.where((item) {
-//       if (item is Map<String, dynamic>) {
-//         return item['departure_datetime'] == null;
-//       }
-//       return false;
-//     }).toList();
-
-//     // Returning the length of the filtered list
-//     return filteredItems.length;
-//   }
-
-//   int getOriginalTripStopNumber(List<dynamic> items) {
-//     return items.length;
-//   }
-
-//   String getCurrentStop(List<dynamic> items) {
-//     // items.sort((a, b) => a['stop_number'].compareTo(b['stop_number'])) as List<Map<String, dynamic>>;
-//     final int remaining = getRemainingStops(items);
-//     final int original = getOriginalTripStopNumber(items);
-//     return items[original - remaining]['stop_name'];
-//   }
-
-//   int getCurrentId(List<dynamic> items) {
-//     // items.sort((a, b) => a['stop_number'].compareTo(b['stop_number']));
-//     final int remaining = getRemainingStops(items);
-//     final int original = getOriginalTripStopNumber(items);
-//     return items[original - remaining]['id'];
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     List? tripStops = context.read<VehicleInfoExtendedProvider>().tripStops;
-//     if (tripStops != null) {
-//       String? currentStop = context.read<VehicleRouteInfoProvider>().currentStopId;
-//       if (getRemainingStops(tripStops) == getOriginalTripStopNumber(tripStops)) {
-//         return ElevatedButton(
-//           style: ElevatedButton.styleFrom(
-//             minimumSize: const Size.fromHeight(60),
-//             backgroundColor: Colors.green,
-//             foregroundColor: CustomThemeColors.themeWhite
-//           ),
-//           onPressed: () async {
-//             print(getRemainingStops(tripStops));
-//             try {
-//               await BusOperations.startTrip(
-//                 context.read<DomainProvider>().url as String,
-//                 context.read<CredentialsProvider>().accessToken as String,
-//                 getCurrentId(tripStops),
-//                 context.read<DispatchInfoProvider>().dispatchId as String,
-//               );
-//               if (context.mounted) {
-//                 final vehicleInfoExtended = await getVehicleInfoExtended(
-//                   context.read<DomainProvider>().url as String,
-//                   context.read<CredentialsProvider>().accessToken as String,
-//                   context.read<VehicleRouteInfoProvider>().vehicleId as String,
-//                   context.read<VehicleRouteInfoProvider>().routeId as String,
-//                   context.read<DispatchInfoProvider>().dispatchId as String,
-//                 );
-//                 if (context.mounted) {
-//                   context.read<VehicleInfoExtendedProvider>().initVehicleInfoExtended(
-//                     vehicleInfoExtended.vehicleName,
-//                     vehicleInfoExtended.vehiclePlateNumber,
-//                     vehicleInfoExtended.vehicleImageId,
-//                     vehicleInfoExtended.driverUserId,
-//                     vehicleInfoExtended.conductorUserId,
-//                     vehicleInfoExtended.normalSeatsRemaining,
-//                     vehicleInfoExtended.pwdSeatsRemaining,
-//                     vehicleInfoExtended.tripStops
-//                   );
-//                   print(getRemainingStops(tripStops));
-//                 }
-//               }
-//             } catch (e) {
-//               if (context.mounted) {
-//                 showDialog(
-//                   context: context,
-//                   builder: (BuildContext context) {
-//                     return AlertDialog(
-//                       title: const Text('Error Encountered'),
-//                       content: Text('$e'),
-//                     );
-//                   }
-//                 );
-//               }
-//             }
-//           },
-//           child: const Text('Start Trip')
-//         );
-//       } else if (getRemainingStops(tripStops) == 1) {
-//         return ElevatedButton(
-//           style: ElevatedButton.styleFrom(
-//             minimumSize: const Size.fromHeight(60),
-//             backgroundColor: Colors.purple,
-//             foregroundColor: CustomThemeColors.themeWhite
-//           ),
-//           onPressed: () {
-        
-//           },
-//           child: const Text('End Trip')
-//         );
-//       } else {
-//         if (currentStop != null) {
-//           return ElevatedButton(
-//             style: ElevatedButton.styleFrom(
-//               minimumSize: const Size.fromHeight(60),
-//               backgroundColor: Colors.deepOrange,
-//               foregroundColor: CustomThemeColors.themeWhite
-//             ),
-//             onPressed: () {
-          
-//             },
-//             child: const Text('Depart')
-//           );
-//         } else {
-//           return ElevatedButton(
-//             style: ElevatedButton.styleFrom(
-//               minimumSize: const Size.fromHeight(60),
-//               backgroundColor: CustomThemeColors.themeBlue,
-//               foregroundColor: CustomThemeColors.themeWhite
-//             ),
-//             onPressed: () {
-          
-//             },
-//             child: const Text('Arrive')
-//           );
-//         }
-//       }
-//     } else {
-//       return ElevatedButton(
-//             style: ElevatedButton.styleFrom(
-//               minimumSize: const Size.fromHeight(60),
-//               backgroundColor: Colors.black,
-//               foregroundColor: CustomThemeColors.themeWhite,
-//             ),
-//             onPressed: () {
-          
-//             },
-//             child: const Text('No Trip Assigned')
-//           );
-//     }
-//   }
-// }
 
 class DynamicButtons extends StatefulWidget {
   const DynamicButtons({super.key});
@@ -413,7 +248,7 @@ class _DynamicButtonsState extends State<DynamicButtons> {
               onPressed: () async {
                 // End Trip action
                 try {
-                  print('asd dasd');
+                  // print('asd dasd');
                   await BusOperations.endTrip(
                     context.read<DomainProvider>().url as String,
                     context.read<CredentialsProvider>().accessToken as String,

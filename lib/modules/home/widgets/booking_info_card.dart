@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pwd_reservation_app/commons/themes/theme_modules.dart';
-import 'package:pwd_reservation_app/modules/reservation/drivers/bus_selected.dart';
+import 'package:pwd_reservation_app/modules/reservation/drivers/passengers.dart';
+import 'package:pwd_reservation_app/modules/reservation/drivers/reservations.dart';
 
 class BookingInfoCard extends StatefulWidget {
   const BookingInfoCard({
@@ -199,49 +200,49 @@ class NoBookingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Card(
-          color: CustomThemeColors.themeLightBlue,
-          child: SizedBox(
-            height: 130,
-            child: Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: Text(
-                      '',
-                      style: TextStyle(
-                        color: CustomThemeColors.themeWhite,
-                        fontWeight: FontWeight.bold
-                      ),
-                    ),
+      color: CustomThemeColors.themeLightBlue,
+      child: SizedBox(
+        height: 130,
+        child: Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Align(
+                alignment: Alignment.topRight,
+                child: Text(
+                  '',
+                  style: TextStyle(
+                    color: CustomThemeColors.themeWhite,
+                    fontWeight: FontWeight.bold
                   ),
-                  Align(
-                    alignment: Alignment.center,
-                    child: Text(
-                      'Book a Bus Now Below!!',
-                      style: TextStyle(
-                        color: CustomThemeColors.themeGrey,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20
-                      ),
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.bottomRight,
-                    child: Text(
-                      '',
-                      style: TextStyle(
-                        color: CustomThemeColors.themeWhite,
-                        fontWeight: FontWeight.bold
-                      ),
-                    ),
-                  )
-                ],
+                ),
               ),
-            ),
-          )
-        );
+              Align(
+                alignment: Alignment.center,
+                child: Text(
+                  'Book a Bus Now Below!!',
+                  style: TextStyle(
+                    color: CustomThemeColors.themeGrey,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20
+                  ),
+                ),
+              ),
+              Align(
+                alignment: Alignment.bottomRight,
+                child: Text(
+                  '',
+                  style: TextStyle(
+                    color: CustomThemeColors.themeWhite,
+                    fontWeight: FontWeight.bold
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+      )
+    );
   }
 }

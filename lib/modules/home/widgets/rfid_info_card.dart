@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pwd_reservation_app/commons/themes/theme_modules.dart';
-import 'package:pwd_reservation_app/modules/reservation/drivers/bus_selected.dart';
+import 'package:pwd_reservation_app/modules/reservation/drivers/passengers.dart';
 
 class RfidInfoCard extends StatelessWidget {
   const RfidInfoCard({super.key});

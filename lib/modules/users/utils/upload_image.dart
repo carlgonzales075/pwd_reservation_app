@@ -51,7 +51,7 @@ class SimpleImage {
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body)['data'];
 
-          return data['id'].toString(); // Assuming 'id' is a String in the map
+          return data['id'].toString();
       } else {
         throw Exception('Failed to upload images: ${response.body}');
       }

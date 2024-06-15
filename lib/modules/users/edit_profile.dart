@@ -8,6 +8,7 @@ import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
 import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
 import 'package:pwd_reservation_app/modules/shared/drivers/images.dart';
 import 'package:pwd_reservation_app/modules/users/utils/upload_image.dart';
+import 'package:pwd_reservation_app/modules/users/utils/users.dart';
 
 
 class EditProfileScreen extends StatefulWidget {

@@ -26,12 +26,6 @@ class User {
       final email = data['email'] as String?;
       final role = data['role']['name'] as String?;
       if (firstName != null && lastName != null) {
-        print(userId);
-        print(firstName);
-        print(lastName);
-        print(avatar);
-        print(email);
-        print(role);
         return User(
           userId: userId,
           firstName: firstName,

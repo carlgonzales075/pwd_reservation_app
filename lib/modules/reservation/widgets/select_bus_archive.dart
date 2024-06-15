@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
 import 'package:pwd_reservation_app/commons/themes/theme_modules.dart';
-import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
-import 'package:pwd_reservation_app/modules/reservation/drivers/bus_selected.dart';
-import 'package:pwd_reservation_app/modules/reservation/drivers/routes.dart';
+import 'package:pwd_reservation_app/modules/reservation/drivers/passengers.dart';
+import 'package:pwd_reservation_app/modules/reservation/drivers/reservations.dart';
+import 'package:pwd_reservation_app/modules/reservation/drivers/seat_assignment.dart';
+import 'package:pwd_reservation_app/modules/reservation/drivers/stops.dart';
 import 'package:provider/provider.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
+import 'package:pwd_reservation_app/modules/reservation/drivers/vehicles.dart';
 import 'package:pwd_reservation_app/modules/shared/drivers/images.dart';
 import 'package:pwd_reservation_app/modules/shared/widgets/widgets_module.dart';
 
@@ -46,10 +47,8 @@ class SelectBusScreen extends StatelessWidget {
             // print(context.read<PassengerProvider>().passengerType);
             return FutureBuilder<List<Vehicles>>(
             future: postVehicles(
-              context.read<CredentialsProvider>().accessToken as String,
-              stops.pickupId as String,
+              context, stops.pickUpId as String,
               stops.destinationId as String,
-              context.read<DomainProvider>().url as String,
               context.read<PassengerProvider>().passengerType != 'Normal'
             ),
             builder: (BuildContext context, AsyncSnapshot<List<Vehicles>> snapshot) {
@@ -102,10 +101,14 @@ class SelectBusScreen extends StatelessWidget {
                   );
                 }
               } else if (snapshot.hasError) {
-                return Text('${snapshot.error}, ${stops.destinationId}, ${stops.pickupId}');
+                return Text('${snapshot.error}, ${stops.destinationId}, ${stops.pickUpId}');
               }
 
-              return const CircularProgressIndicator();
+              return const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator()
+              );
             });
           })
         ],
@@ -257,15 +260,13 @@ class BusCarouselItemDesc extends StatelessWidget {
                   // print('asd dsf');
                   PassengerSeatAssignment seatAssignment = await postSeatReservation(
                     context,
-                    context.read<CredentialsProvider>().accessToken as String,
                     vehicle.getNestedValue('vehicle_id.id'),
-                    context.read<StopsProvider>().pickupId as String,
+                    context.read<StopsProvider>().pickUpId as String,
                     context.read<StopsProvider>().destinationId as String,
-                    context.read<DomainProvider>().url as String
                   );
                   
                   if (context.mounted) {
-                    print(seatAssignment.seatAssigned);
+                    // print(seatAssignment.seatAssigned);
                     if (seatAssignment.seatAssigned == null) {
                       showDialog(
                         context: context,
@@ -294,9 +295,8 @@ class BusCarouselItemDesc extends StatelessWidget {
                       );
                     } else {
                       ReservationInfo reservationInfo = await getReservationInfo(
-                        context.read<CredentialsProvider>().accessToken as String,
+                        context,
                         seatAssignment.seatAssigned as String,
-                        context.read<DomainProvider>().url as String
                       );
 
                       if (context.mounted) {

@@ -1,24 +1,29 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:pwd_reservation_app/modules/auth/auth_modules.dart';
 import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
-import 'package:pwd_reservation_app/modules/employee/drivers/dispatch_info.dart';
-import 'package:pwd_reservation_app/modules/employee/drivers/employee.dart';
+import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/drivers/dispatch_info.dart';
+import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/drivers/employee.dart';
 import 'package:pwd_reservation_app/modules/auth/register/register.dart';
 import 'package:pwd_reservation_app/modules/auth/register/register_upload.dart';
 import 'package:pwd_reservation_app/modules/domain/domain.dart';
-import 'package:pwd_reservation_app/modules/employee/drivers/partner_employee.dart';
-import 'package:pwd_reservation_app/modules/employee/drivers/screen_change.dart';
-import 'package:pwd_reservation_app/modules/employee/drivers/vehicle_info_extended.dart';
-import 'package:pwd_reservation_app/modules/employee/drivers/vehicle_route_info.dart';
-import 'package:pwd_reservation_app/modules/employee/employee_screen.dart';
+import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/drivers/partner_employee.dart';
+import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/drivers/screen_change.dart';
+import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/drivers/vehicle_info_extended.dart';
+import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/drivers/vehicle_route_info.dart';
+import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/employee_screen.dart';
+import 'package:pwd_reservation_app/modules/employee/modules/inspect_seats/drivers/last_update.dart';
+import 'package:pwd_reservation_app/modules/employee/modules/inspect_seats/inspect_seats.dart';
 import 'package:pwd_reservation_app/modules/home/home_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:pwd_reservation_app/modules/reservation/drivers/bus_selected.dart';
-import 'package:pwd_reservation_app/modules/reservation/drivers/routes.dart';
-import 'package:pwd_reservation_app/modules/reservation/reservation.dart';
-import 'package:pwd_reservation_app/modules/reservation/select_bus.dart';
+import 'package:pwd_reservation_app/modules/reservation/drivers/passengers.dart';
+import 'package:pwd_reservation_app/modules/reservation/drivers/reservations.dart';
+import 'package:pwd_reservation_app/modules/reservation/drivers/stops.dart';
+import 'package:pwd_reservation_app/modules/reservation/trip_booking.dart';
+import 'package:pwd_reservation_app/modules/select_bus/select_bus.dart';
 import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
 import 'package:pwd_reservation_app/modules/users/edit_profile.dart';
+import 'package:pwd_reservation_app/modules/users/utils/users.dart';
 // import 'package:camera/camera.dart';
 
 // late List<CameraDescription> _cameras;
@@ -65,6 +70,9 @@ Future<void> main() async {
           ChangeNotifierProvider(
             create: (context) => PartnerEmployeeProvider()
           ),
+          ChangeNotifierProvider(
+            create: (context) => LastUpdateProvider()
+          ),
       ],
       child: const MyApp(),
     )
@@ -89,7 +97,8 @@ class MyApp extends StatelessWidget {
         "/reservation": (BuildContext context) => const ReservationScreen(),
         "/select-bus": (BuildContext context) => const SelectBusScreen(),
         "/domain": (BuildContext context) => const DomainScreen(),
-        "/edit-profile": (BuildContext context) => const EditProfileScreen()
+        "/edit-profile": (BuildContext context) => const EditProfileScreen(),
+        "/seats": (BuildContext context) => const InspectSeatsScreen()
       }
     ); 
   }
