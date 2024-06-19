@@ -263,6 +263,7 @@ class BusCarouselItemDesc extends StatelessWidget {
                     vehicle.getNestedValue('vehicle_id.id'),
                     context.read<StopsProvider>().pickUpId as String,
                     context.read<StopsProvider>().destinationId as String,
+                    context.read<PassengerProvider>().disabilityInfo
                   );
                   
                   if (context.mounted) {

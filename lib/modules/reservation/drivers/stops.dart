@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:http/http.dart' as http;
 import 'package:pwd_reservation_app/modules/shared/drivers/apis.dart';
 
@@ -13,6 +14,7 @@ class StopsProvider extends ChangeNotifier {
   String? pickUpId;
   String? destinationPointLocation;
   String? pickUpPointLocation;
+  List<Map<String, GeoPoint>>? inBetween;
 
   void updateDestination({
     required String? stopNameDestination,
@@ -25,6 +27,14 @@ class StopsProvider extends ChangeNotifier {
     this.destinationIndex = destinationIndex;
     this.destinationPointLocation = destinationPointLocation;
     notifyListeners();
+  }
+
+  List<GeoPoint> getIntersections() {
+    List<GeoPoint> geoPointList = [];
+    for (int i = 0; i < inBetween!.length; i++) {
+      geoPointList.add(inBetween![i].values.first);
+    }
+    return geoPointList;
   }
 
   void updatePickUp({
@@ -40,11 +50,18 @@ class StopsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateInBetween({
+    required List<Map<String, GeoPoint>>? inBetween
+  }) {
+    this.inBetween = inBetween;
+  }
+
   void resetDestination() {
     stopNameDestination = null;
     destinationIndex = null;
     destinationId = null;
     destinationPointLocation = null;
+    inBetween = null;
     notifyListeners();
   }
 
@@ -53,6 +70,7 @@ class StopsProvider extends ChangeNotifier {
     pickUpIndex = null;
     pickUpId = null;
     pickUpPointLocation = null;
+    inBetween = null;
     notifyListeners();
   }
 
@@ -65,6 +83,7 @@ class StopsProvider extends ChangeNotifier {
     pickUpId = null;
     destinationPointLocation = null;
     pickUpPointLocation = null;
+    inBetween = null;
     notifyListeners();
   }
 }

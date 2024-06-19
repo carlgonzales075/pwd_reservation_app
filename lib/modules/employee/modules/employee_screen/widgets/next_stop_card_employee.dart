@@ -9,6 +9,31 @@ import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/dri
 import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/drivers/vehicle_route_info.dart';
 import 'package:pwd_reservation_app/modules/shared/drivers/images.dart';
 
+class NextStopCard extends StatelessWidget {
+  const NextStopCard({super.key});
+
+ @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+          'Trip Info',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+              color: CustomThemeColors.themeBlue
+            ),
+          ),
+          NextStopBody(),
+        ],
+      )
+    );
+  }
+}
+
 class NextStopBody extends StatelessWidget {
   const NextStopBody({super.key});
 

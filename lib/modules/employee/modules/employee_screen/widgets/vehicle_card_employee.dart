@@ -11,6 +11,33 @@ import 'package:pwd_reservation_app/modules/employee/modules/inspect_seats/drive
 import 'package:pwd_reservation_app/modules/shared/drivers/images.dart';
 // import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 
+class VehicleCard extends StatelessWidget {
+  const VehicleCard({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+          'Vehicle Info',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+              color: CustomThemeColors.themeBlue
+            ),
+          ),
+          VehicleCardBody(),
+        ],
+      )
+    );
+  }
+}
+
 class VehicleCardBody extends StatelessWidget {
   const VehicleCardBody({super.key});
 

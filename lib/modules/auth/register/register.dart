@@ -105,7 +105,7 @@ class _RegisterAuthScreen extends State<RegisterAuthScreen> {
                 const SizedBox(height: 20.0),
                 BasicElevatedButton(
                   buttonText: buttonText,
-                  onPressed: () {_registerHelperFunc(isChecked);},
+                  onPressed: () => _registerHelperFunc(isChecked),
                 )
               ],
             ),

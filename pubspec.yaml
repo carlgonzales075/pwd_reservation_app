@@ -11,7 +11,7 @@ dependencies:
     sdk: flutter
   http: ^1.2.1
   provider: ^6.0.0
-  flutter_secure_storage: ^5.1.2
+  flutter_secure_storage: ^4.2.1
   camera: ^0.10.5+9
   path_provider: ^2.1.2
   path: ^1.9.0
@@ -22,7 +22,9 @@ dependencies:
   http_parser: ^4.0.2
   image_picker: ^1.1.1
   flutter_ringtone_player: ^4.0.0+2
-  flutter_osm_plugin: ^1.0.5
+  flutter_osm_plugin: ^0.70.4
+  scrollable_positioned_list: ^0.3.8
+  intl: ^0.17.0
 
 dev_dependencies:
   flutter_test:

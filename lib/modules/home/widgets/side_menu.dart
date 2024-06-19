@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:pwd_reservation_app/commons/themes/theme_modules.dart';
 import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/drivers/screen_change.dart';
 import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/drivers/vehicle_info_extended.dart';
-import 'package:pwd_reservation_app/modules/home/drivers/side_menu.dart';
+import 'package:pwd_reservation_app/modules/home/drivers/check_pwd_approval.dart';
 import 'package:pwd_reservation_app/modules/shared/drivers/dialogs.dart';
 import 'package:pwd_reservation_app/modules/users/utils/users.dart';
 
@@ -39,26 +40,26 @@ class PassengerDrawer extends StatelessWidget {
                     fit: BoxFit.fill,
                     image: AssetImage('assets/images/cover.jpg'))),
             child: Text(
-              'Side menu',
+              'PWD Reservation App',
               style: TextStyle(color: Colors.white, fontSize: 25),
             ),
           ),
-          ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('Change Domain'),
+          SideMenuListTile(
+            icon: Icons.settings,
+            title: 'Change Domain',
             onTap: () {
               Navigator.of(context).pop();
               Navigator.pushNamed(context, '/domain');
-            },
+            }
           ),
-          ListTile(
-            leading: const Icon(Icons.wheelchair_pickup_sharp),
-            title: const Text('Register as PWD/SC'),
+          SideMenuListTile(
+            icon: Icons.wheelchair_pickup_sharp,
+            title: 'Register as PWD/SC',
             onTap: () async {
               Navigator.of(context).pop();
-              checkPWDApproval(context);
+              checkPWDApproval(context); 
             },
-          )
+          ),
         ],
       ),
     );
@@ -96,15 +97,15 @@ class _EmployeeDrawerState extends State<EmployeeDrawer> {
                     fit: BoxFit.fill,
                     image: AssetImage('assets/images/cover.jpg'))),
             child: Text(
-              'Side menu',
+              'PWD Bus Reservation',
               style: TextStyle(color: Colors.white, fontSize: 25),
             ),
           ),
-          ListTile(
-            leading: const Icon(Icons.swipe),
-            title: Text('Switch to ${
-              context.read<EmployeeScreenSwitcher>().screenSwitchPassenger ? 'Passenger': 'Employee'
-            }'),
+          SideMenuListTile(
+            icon: Icons.swipe,
+            title: 'Switch to ${
+                context.read<EmployeeScreenSwitcher>().screenSwitchPassenger ? 'Passenger': 'Employee'
+              }',
             onTap: () {
               // Navigator.of(context).pop();
               if (context.read<EmployeeScreenSwitcher>().screenSwitchPassenger) {
@@ -118,19 +119,19 @@ class _EmployeeDrawerState extends State<EmployeeDrawer> {
                 Navigator.pushReplacementNamed(context, "/employee-home");
                 context.read<EmployeeScreenSwitcher>().switchScreens();
               }
-            },
+            }
           ),
-          ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('Change Domain'),
+          SideMenuListTile(
+            icon: Icons.settings,
+            title: 'Change Domain',
             onTap: () {
               Navigator.of(context).pop();
               Navigator.pushNamed(context, '/domain');
-            },
+            }
           ),
-          ListTile(
-            leading: const Icon(Icons.wheelchair_pickup_sharp),
-            title: const Text('Register as PWD/SC'),
+          SideMenuListTile(
+            icon: Icons.wheelchair_pickup_sharp,
+            title: 'Register as PWD/SC',
             onTap: () async {
               Navigator.of(context).pop();
               if (context.read<VehicleInfoExtendedProvider>().vehicleName == null) {
@@ -139,9 +140,46 @@ class _EmployeeDrawerState extends State<EmployeeDrawer> {
                 _focusOnTrip(context);
               }
             },
-          )
+          ),
         ],
       ),
+    );
+  }
+}
+
+class SideMenuListTile extends StatelessWidget {
+  const SideMenuListTile({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.onTap
+  });
+
+  final IconData icon;
+  final String title;
+  final VoidCallback onTap;
+
+  @override
+  Widget build (BuildContext context) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: Container(
+        padding: const EdgeInsets.all(15),
+        decoration: const BoxDecoration(
+          color: CustomThemeColors.themeBlue
+        ),
+        child: Icon(
+          icon,
+          color: CustomThemeColors.themeWhite,
+        )
+      ),
+      title: Text(
+        title,
+        style: const TextStyle(
+          color: CustomThemeColors.themeBlue
+        )
+      ),
+      onTap: onTap,
     );
   }
 }

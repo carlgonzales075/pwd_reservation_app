@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pwd_reservation_app/commons/themes/theme_modules.dart';
-import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
 import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/drivers/vehicle_route_info.dart';
 import 'package:pwd_reservation_app/modules/employee/modules/inspect_seats/drivers/last_update.dart';
 import 'package:pwd_reservation_app/modules/employee/modules/inspect_seats/drivers/seat_status.dart';
-// import 'package:pwd_reservation_app/modules/reservation/select_bus.dart';
 import 'package:pwd_reservation_app/modules/reservation/widgets/select_bus_archive.dart';
-import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
 import 'package:pwd_reservation_app/modules/shared/drivers/images.dart';
 import 'package:pwd_reservation_app/modules/users/utils/users.dart';
 
@@ -22,8 +19,7 @@ class SeatsGrid extends StatelessWidget {
       padding: const EdgeInsets.all(8.0),
       child: FutureBuilder<List<dynamic>>(
         future: getSeatsUpdates(
-          context.read<DomainProvider>().url as String,
-          context.read<CredentialsProvider>().accessToken as String,
+          context,
           context.read<VehicleRouteInfoProvider>().vehicleId as String,
           context.read<UserProvider>().userId as String
         ),
@@ -121,15 +117,13 @@ class _SeatsTileState extends State<SeatsTile> {
                 Navigator.pop(context);
                 Navigator.pushNamed(context, '/seats');
                 await updateReadBy(
-                  context.read<DomainProvider>().url as String,
-                  context.read<CredentialsProvider>().accessToken as String,
+                  context,
                   context.read<UserProvider>().userId as String,
                   seatId
                 );
                 if (context.mounted) {
                   LastUpdate hasUpdates = await checkUpdates(
-                    context.read<DomainProvider>().url as String,
-                    context.read<CredentialsProvider>().accessToken as String,
+                    context,
                     context.read<VehicleRouteInfoProvider>().vehicleId as String,
                     DateTime.now(),
                     context.read<UserProvider>().userId as String
@@ -156,8 +150,7 @@ class _SeatsTileState extends State<SeatsTile> {
     if (passengerInfo.isNotEmpty) {
       final Map<String, dynamic> firstPassenger = passengerInfo[0];
       await updateReadBy(
-        context.read<DomainProvider>().url as String,
-        context.read<CredentialsProvider>().accessToken as String,
+        context,
         context.read<UserProvider>().userId as String,
         seatId
       );
@@ -169,8 +162,7 @@ class _SeatsTileState extends State<SeatsTile> {
               backgroundColor: CustomThemeColors.themeWhite,
               content: FutureBuilder<Map<String, dynamic>>(
                 future: getPassengerUserInfo(
-                  context.read<DomainProvider>().url as String,
-                  context.read<CredentialsProvider>().accessToken as String,
+                  context,
                   firstPassenger['user_id']
                 ),
                 builder: (context, snapshot) {
@@ -244,8 +236,7 @@ class _SeatsTileState extends State<SeatsTile> {
                     Navigator.pop(context);
                     Navigator.pushNamed(context, '/seats');
                     LastUpdate hasUpdates = await checkUpdates(
-                      context.read<DomainProvider>().url as String,
-                      context.read<CredentialsProvider>().accessToken as String,
+                      context,
                       context.read<VehicleRouteInfoProvider>().vehicleId as String,
                       DateTime.now(),
                       context.read<UserProvider>().userId as String
@@ -266,8 +257,7 @@ class _SeatsTileState extends State<SeatsTile> {
           }
         );
         LastUpdate hasUpdates = await checkUpdates(
-          context.read<DomainProvider>().url as String,
-          context.read<CredentialsProvider>().accessToken as String,
+          context,
           context.read<VehicleRouteInfoProvider>().vehicleId as String,
           DateTime.now(),
           context.read<UserProvider>().userId as String

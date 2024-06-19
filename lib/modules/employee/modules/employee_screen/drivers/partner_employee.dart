@@ -2,6 +2,10 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
+import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
+import 'package:pwd_reservation_app/modules/shared/drivers/apis.dart';
 
 class PartnerUser {
   // final String? userId;
@@ -81,8 +85,11 @@ class PartnerEmployeeProvider extends ChangeNotifier {
   }
 }
 
-Future<PartnerUser> getPartnerUser(String domain, String accessToken, String userId) async {
-  try {
+Future<PartnerUser> getPartnerUser(BuildContext context, String userId) async {
+  final String domain = context.read<DomainProvider>().url.toString();
+  final String accessToken = context.read<CredentialsProvider>().accessToken.toString();
+  
+  Future<http.Response> getPartnerUser() async {
     final response = await http.get(
       Uri.parse(
         '$domain/users/$userId'
@@ -91,21 +98,14 @@ Future<PartnerUser> getPartnerUser(String domain, String accessToken, String use
         "Authorization": "Bearer $accessToken"
       }
     );
-    if (response.statusCode == 200) {
-      return PartnerUser.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
-    } else {
-      Map<String, dynamic> responseData = jsonDecode(response.body);
-      List<dynamic> errors = responseData['errors'];
-      if (errors.isNotEmpty) {
-        Map<String, dynamic> error = errors[0];
-        String errorMessage = error['message'];
-        String errorCode = error['extensions']['code'];
-        throw Exception('$errorCode: $errorMessage ${response.headers}');
-      } else {
-        throw Exception('Login failed: Unknown error');
-      }
-    }
-  } catch (e) {
-    throw Exception(e.toString());
+    return response;
   }
+  final responseBody = await DirectusCalls.apiCall(
+    context,
+    getPartnerUser(),
+    'Get Partner User',
+    (error) {},
+    showModal: false
+  );
+  return PartnerUser.fromJson(jsonDecode(responseBody) as Map<String, dynamic>);
 }

@@ -255,3 +255,112 @@ class _BusImageProfile extends State<BusImageProfile> {
     );
   }
 }
+
+class IdNetworkImage extends StatefulWidget {
+  const IdNetworkImage({
+    super.key,
+    required this.assetId,
+    this.width=double.infinity,
+    this.height=200
+  });
+  final String assetId;
+  final double width;
+  final double height;
+
+  @override
+  State<IdNetworkImage> createState() => _IdNetworkImage();
+}
+
+class _IdNetworkImage extends State<IdNetworkImage> {
+  @override
+  Widget build(BuildContext context) {
+    String domain = context.read<DomainProvider>().url as String;
+
+    return Consumer<UserProvider>(
+      builder: (context, userProvider, child) {
+         return GestureDetector(
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return Dialog(
+                    backgroundColor: Colors.transparent,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).pop(); // Close the dialog on tap
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        height: double.infinity,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: NetworkImage('$domain/assets/${widget.assetId}'),
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+            child: Padding(
+            padding: const EdgeInsets.all(5.0),  // Add padding of 5 pixels on all sides
+            child: Container(
+              width: widget.width,  // Set width to 100 pixels
+              height: widget.height,  // Set height to 200 pixels
+              decoration: const BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(20.0)),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20.0),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    const CircularProgressIndicator(),  // Show CircularProgressIndicator by default
+                    Image.network(
+                      '$domain/assets/${widget.assetId}',
+                      fit: BoxFit.cover,
+                      loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                        if (loadingProgress == null) {
+                          return child;  // When the image is fully loaded, show the image
+                        } else {
+                          return Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
+                                  : null,
+                            ),
+                          );
+                        }
+                      },
+                      errorBuilder: (BuildContext context, Object error, StackTrace? stackTrace) {
+                        return const Icon(Icons.error);  // Show an error icon if the image fails to load
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+                   ),
+         );
+        // return Padding(
+        //   padding: const EdgeInsets.all(5.0),  // Add padding of 10 pixels on all sides
+        //   child: Container(
+        //     width: double.infinity,  // Set width to 100 pixels
+        //     height: 200,  // Set height to 100 pixels
+        //     decoration: BoxDecoration(
+        //       image: DecorationImage(
+        //         image: NetworkImage(
+        //           '$domain/assets/${widget.assetId}',
+        //         ),
+        //         fit: BoxFit.cover,  // Ensures the image covers the entire container
+        //       ),
+        //       borderRadius: const BorderRadius.all(Radius.circular(20.0)),
+        //     ),
+        //   ),
+        // );
+      },
+    );
+  }
+}

@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
-import 'package:pwd_reservation_app/modules/reservation/drivers/passengers.dart';
 import 'package:pwd_reservation_app/modules/shared/drivers/apis.dart';
 import 'package:pwd_reservation_app/modules/users/utils/users.dart';
 
@@ -25,7 +24,7 @@ class PassengerSeatAssignment {
 }
 
 Future<PassengerSeatAssignment> postSeatReservation(BuildContext context, String vehicleId,
-  String stopPickUpId, String stopDestinationId) async {
+  String stopPickUpId, String stopDestinationId, String? disabilityInfo) async {
   
   final domain = DirectusCalls.getBasics(context)[0];
   final accessToken = DirectusCalls.getBasics(context)[1];
@@ -34,7 +33,7 @@ Future<PassengerSeatAssignment> postSeatReservation(BuildContext context, String
       final requestBody = jsonEncode({
         "user_id": context.read<UserProvider>().userId,
         "vehicle_id": vehicleId,
-        "is_pwd": context.read<PassengerProvider>().disabilityInfo != null,
+        "is_pwd": disabilityInfo != null,
         "occupied_from": stopPickUpId,
         "occupied_to": stopDestinationId
       });
@@ -89,7 +88,8 @@ Future<String?> cancelBooking(BuildContext context, String passengerId, String s
     cancelBookingFunction(),
     'Cancel Booking',
     (error) {},
-    processingTitle: 'Cancelling...'
+    processingTitle: 'Cancelling...',
+    showModal: false
   );
   Map<String, dynamic> newResponseBody = jsonDecode(responseBody) as Map<String, dynamic>;
   return newResponseBody['data'];

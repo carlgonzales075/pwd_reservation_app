@@ -1,6 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
+import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
+import 'package:pwd_reservation_app/modules/shared/drivers/apis.dart';
 
 
 class VehicleRouteInfo {
@@ -75,12 +79,14 @@ class VehicleRouteInfoProvider extends ChangeNotifier {
   }
 }
 
-Future<VehicleRouteInfo> getVehicleRouteInfo(String domain, String accessToken, String employeeId) async {
-  final requestBody = jsonEncode({
-    "employee_id": employeeId
-  });
-  // print('asd fadf ');
-  try {
+Future<VehicleRouteInfo> getVehicleRouteInfo(BuildContext context, String employeeId) async {
+  final String domain = context.read<DomainProvider>().url.toString();
+  final String accessToken = context.read<CredentialsProvider>().accessToken.toString();
+  
+  Future<http.Response> getVehicleRouteInfoFunc() async {
+    final requestBody = jsonEncode({
+      "employee_id": employeeId
+    });
     final response = await http.post(
       Uri.parse('$domain/flows/trigger/581e4ba8-7ff0-43e1-97e3-b03f15e2ed61'),
       headers: {
@@ -89,23 +95,14 @@ Future<VehicleRouteInfo> getVehicleRouteInfo(String domain, String accessToken, 
       },
       body: requestBody
     );
-
-    if (response.statusCode == 200) {
-      // print(response.body);
-      return VehicleRouteInfo.fromJson(jsonDecode(response.body) as List<dynamic>);
-    } else {
-      Map<String, dynamic> responseData = jsonDecode(response.body);
-      List<dynamic> errors = responseData['errors'];
-      if (errors.isNotEmpty) {
-        Map<String, dynamic> error = errors[0];
-        String errorMessage = error['message'];
-        String errorCode = error['extensions']['code'];
-        throw Exception('$errorCode: $errorMessage ${response.headers}');
-      } else {
-        throw Exception('Login failed: Unknown error');
-      }
-    }
-  } catch (e) {
-    throw Exception('Uncatched Error: $e');
+    return response;
   }
+  final responseBody = await DirectusCalls.apiCall(
+    context,
+    getVehicleRouteInfoFunc(),
+    'Get Vehicle Route Info',
+    (error) {},
+    showModal: false
+  );
+  return VehicleRouteInfo.fromJson(jsonDecode(responseBody) as List<dynamic>);
 }

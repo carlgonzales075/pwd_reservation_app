@@ -1,16 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-// import 'package:flutter/widgets.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
 import 'package:pwd_reservation_app/modules/auth/register/drivers/file_upload.dart';
 import 'package:pwd_reservation_app/modules/reservation/drivers/passengers.dart';
-import 'package:pwd_reservation_app/modules/reservation/drivers/seat_assignment.dart';
-import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
 import 'package:pwd_reservation_app/modules/shared/widgets/widgets_module.dart';
-// import 'package:pwd_reservation_app/modules/shared/drivers/camera.dart';
 
 class UploadScreen extends StatefulWidget {
   const UploadScreen({super.key});
@@ -21,6 +16,13 @@ class UploadScreen extends StatefulWidget {
 
 class _UploadScreenState extends State<UploadScreen> {
   final List<File?> _selectedImages = List.generate(3, (_) => null);
+  final TextEditingController _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +36,9 @@ class _UploadScreenState extends State<UploadScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text('Select either a PWD or a Senior Citizen ID:'),
-            const BasicStringDropDownMenu(),
+            BasicStringDropDownMenu(
+              controller: _controller,
+            ),
             const SizedBox(height: 10.0),
             _buildCameraButton(0, 'Front of ID', _selectedImages),
             const SizedBox(height: 10.0),
@@ -45,17 +49,16 @@ class _UploadScreenState extends State<UploadScreen> {
             ElevatedButton(
               onPressed: () async {
                 List<String> imageIds = await uploadImages(
-                  context.read<DomainProvider>().url as String,
-                  context.read<CredentialsProvider>().accessToken as String,
+                  context,
                   _selectedImages
                 ) as List<String>;
                 if (context.mounted) {
                   try {
                     await postImageProcessing(
-                      context.read<DomainProvider>().url as String,
-                      context.read<CredentialsProvider>().accessToken as String,
+                      context,
                       imageIds,
-                      context.read<PassengerProvider>().id as String
+                      context.read<PassengerProvider>().id as String,
+                      _controller.text
                     );
                     if (context.mounted) {
                       showDialog(
@@ -69,7 +72,7 @@ class _UploadScreenState extends State<UploadScreen> {
                                 onPressed: () {
                                   Navigator.of(context).pop();
                                   Navigator.of(context).pop();
-                                  // Navigator.of(context).pop();
+                                  Navigator.of(context).pop();
                                 },
                                 child: const Text('Back')
                               )
@@ -225,15 +228,18 @@ enum IconLabel {
 }
 
 class BasicStringDropDownMenu extends StatefulWidget {
-  const BasicStringDropDownMenu({super.key});
+  const BasicStringDropDownMenu({
+    super.key,
+    required this.controller
+  });
+
+  final TextEditingController controller;
 
   @override
-  // ignore: library_private_types_in_public_api
-  _BasicStringDropDownMenu createState() => _BasicStringDropDownMenu();
+  State<BasicStringDropDownMenu> createState() => _BasicStringDropDownMenu();
 }
 
 class _BasicStringDropDownMenu extends State<BasicStringDropDownMenu> {
-  final TextEditingController iconController = TextEditingController();
   IconLabel? selectedIcon;
 
   @override
@@ -242,16 +248,18 @@ class _BasicStringDropDownMenu extends State<BasicStringDropDownMenu> {
       alignment: Alignment.centerLeft,
       width: double.infinity,
       child: DropdownMenu<IconLabel>(
-        controller: iconController,
+        controller: widget.controller,
         requestFocusOnTap: true,
         label: const Text('ID Type'),
         onSelected: (IconLabel? icon) {
           setState(() {
             selectedIcon = icon;
+            if (icon != null) {
+              widget.controller.text = icon.label == 'PWD ID' ? 'PWD': 'Senior Citizen';
+            }
           });
         },
-        dropdownMenuEntries:
-            IconLabel.values.map<DropdownMenuEntry<IconLabel>>(
+        dropdownMenuEntries: IconLabel.values.map<DropdownMenuEntry<IconLabel>>(
           (IconLabel icon) {
             return DropdownMenuEntry<IconLabel>(
               value: icon,

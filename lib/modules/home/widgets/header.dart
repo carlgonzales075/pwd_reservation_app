@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pwd_reservation_app/commons/themes/theme_modules.dart';
 import 'package:pwd_reservation_app/modules/home/widgets/profile_picture.dart';
+import 'package:pwd_reservation_app/modules/reservation/drivers/passengers.dart';
 import 'package:pwd_reservation_app/modules/users/utils/users.dart';
 
-class EmployeeHomeScreenHeader extends StatelessWidget {
-  const EmployeeHomeScreenHeader({super.key});
+class HomeScreenHeader extends StatelessWidget {
+  const HomeScreenHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +21,7 @@ class EmployeeHomeScreenHeader extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            EmployeeHomeScreenNameCard()
+            HomeScreenNameCard()
           ],
         ),
       ),
@@ -28,8 +29,8 @@ class EmployeeHomeScreenHeader extends StatelessWidget {
   }
 }
 
-class EmployeeHomeScreenNameCard extends StatelessWidget {
-  const EmployeeHomeScreenNameCard({super.key});
+class HomeScreenNameCard extends StatelessWidget {
+  const HomeScreenNameCard({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +42,12 @@ class EmployeeHomeScreenNameCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
-              const ProfilePicture(),
+              GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, "/edit-profile");
+                },
+                child: const ProfilePicture()
+              ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
@@ -64,10 +70,8 @@ class EmployeeHomeScreenNameCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '${userProvider.role}',
-                      style: const TextStyle(
-                        color: CustomThemeColors.themeWhite
-                      )
+                      context.read<PassengerProvider>().disabilityInfo ?? 'No Disability',
+                      style: const TextStyle(color: CustomThemeColors.themeWhite)
                     )
                   ],
                 ),

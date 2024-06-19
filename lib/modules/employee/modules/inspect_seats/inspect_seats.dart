@@ -1,15 +1,10 @@
-//import 'dart:html';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-// import 'package:flutter/widgets.dart';
 import 'package:pwd_reservation_app/commons/themes/theme_modules.dart';
-import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
 import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/drivers/vehicle_route_info.dart';
 import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/widgets/notif_modal.dart';
 import 'package:pwd_reservation_app/modules/employee/modules/inspect_seats/drivers/last_update.dart';
 import 'package:pwd_reservation_app/modules/employee/modules/inspect_seats/widgets/seats.dart';
-import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
 import 'package:pwd_reservation_app/modules/users/utils/users.dart';
 
 class InspectSeatsScreen extends StatelessWidget {
@@ -24,8 +19,7 @@ class InspectSeatsScreen extends StatelessWidget {
           onPressed: () async {
             Navigator.pushNamedAndRemoveUntil(context, '/employee-home', (route) => false);
             LastUpdate hasUpdates = await checkUpdates(
-              context.read<DomainProvider>().url as String,
-              context.read<CredentialsProvider>().accessToken as String,
+              context,
               context.read<VehicleRouteInfoProvider>().vehicleId as String,
               DateTime.now(),
               context.read<UserProvider>().userId as String

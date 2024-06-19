@@ -6,11 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
-import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/drivers/dispatch_info.dart';
-import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/drivers/employee.dart';
-import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/drivers/vehicle_info_extended.dart';
 import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/drivers/vehicle_route_info.dart';
 import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
+import 'package:pwd_reservation_app/modules/shared/drivers/apis.dart';
+import 'package:pwd_reservation_app/modules/users/utils/user_info.dart';
 import 'package:pwd_reservation_app/modules/users/utils/users.dart';
 
 class LastUpdateProvider extends ChangeNotifier {
@@ -94,8 +93,7 @@ class LastUpdateProvider extends ChangeNotifier {
   Future<void> checkAndUpdate(BuildContext context) async {
     try {
       LastUpdate hasUpdates = await checkUpdates(
-        context.read<DomainProvider>().url as String,
-        context.read<CredentialsProvider>().accessToken as String,
+        context,
         context.read<VehicleRouteInfoProvider>().vehicleId as String,
         DateTime.now(),
         context.read<UserProvider>().userId as String
@@ -106,51 +104,8 @@ class LastUpdateProvider extends ChangeNotifier {
             hasUpdates.updates,
             hasUpdates.showNotif
           );
-          VehicleRouteInfo vehicleRouteInfo = await getVehicleRouteInfo(
-            context.read<DomainProvider>().url as String,
-            context.read<CredentialsProvider>().accessToken as String,
-            context.read<EmployeeProvider>().id as String
-          );
           if (context.mounted) {
-            context.read<VehicleRouteInfoProvider>().initVehicleRouteInfo(
-              vehicleRouteInfo.routeId,
-              vehicleRouteInfo.vehicleId,
-              vehicleRouteInfo.driverId,
-              vehicleRouteInfo.conductorId,
-              vehicleRouteInfo.currentStopId,
-              vehicleRouteInfo.goingToBusStopId
-            );
-            DispatchInfo dispatchInfo = await getDispatchInfo(
-              context.read<DomainProvider>().url as String,
-              context.read<CredentialsProvider>().accessToken as String,
-              vehicleRouteInfo.vehicleId as String,
-              vehicleRouteInfo.routeId as String
-            );
-            if (context.mounted) {
-              context.read<DispatchInfoProvider>().initDispatchInfo(
-                dispatchInfo.dispatchId,
-                dispatchInfo.dateOfDispatch
-              );
-              VehicleInfoExtended vehicleInfoExtended = await getVehicleInfoExtended(
-                context.read<DomainProvider>().url as String,
-                context.read<CredentialsProvider>().accessToken as String,
-                vehicleRouteInfo.vehicleId as String,
-                vehicleRouteInfo.routeId as String,
-                dispatchInfo.dispatchId as String
-              );
-              if (context.mounted) {
-                context.read<VehicleInfoExtendedProvider>().initVehicleInfoExtended(
-                  vehicleInfoExtended.vehicleName,
-                  vehicleInfoExtended.vehiclePlateNumber,
-                  vehicleInfoExtended.vehicleImageId,
-                  vehicleInfoExtended.driverUserId,
-                  vehicleInfoExtended.conductorUserId,
-                  vehicleInfoExtended.normalSeatsRemaining,
-                  vehicleInfoExtended.pwdSeatsRemaining,
-                  vehicleInfoExtended.tripStops
-                );
-              }
-            }
+            await UserInfo.getTripInfo(context);
           }
         }
       }
@@ -183,40 +138,35 @@ class LastUpdate {
   } 
 }
 
-Future<LastUpdate> checkUpdates(
-  String domain, String accessToken,
-  String vehicleId, DateTime lastUpdate, String userId) async {
+Future<LastUpdate> checkUpdates(BuildContext context, String vehicleId,
+                                DateTime lastUpdate, String userId) async {
+
+  final String domain = context.read<DomainProvider>().url.toString();
+  final String accessToken = context.read<CredentialsProvider>().accessToken.toString();
+
+  Future<http.Response> checkUpdatesFunc() async {
     final requestBody = jsonEncode({
       "vehicle_id": vehicleId,
       "now": lastUpdate.toIso8601String(),
       "get_updates": true,
       "user_id": userId
     });
-    try {
-      final response = await http.post(
-        Uri.parse('$domain/flows/trigger/2339e35b-2d97-4ae8-bd41-799dc927c62e'),
-        headers: {
-          'Content-type': 'application/json',
-          'Authorization': 'Bearer $accessToken'
-        },
-        body: requestBody
-      );
-      if (response.statusCode == 200) {
-        final LastUpdate responseBody = LastUpdate.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
-        return responseBody;
-      } else {
-        Map<String, dynamic> responseData = jsonDecode(response.body);
-        List<dynamic> errors = responseData['errors'];
-        if (errors.isNotEmpty) {
-          Map<String, dynamic> error = errors[0];
-          String errorMessage = error['message'];
-          String errorCode = error['extensions']['code'];
-          throw Exception('$errorCode: $errorMessage ${response.headers}');
-        } else {
-          throw Exception('Getting Seats Unknown Error Encountered.');
-        }
-      }
-    } catch (e) {
-      throw Exception('Error in Checking Updates: $e');
-    }
+    final response = await http.post(
+      Uri.parse('$domain/flows/trigger/2339e35b-2d97-4ae8-bd41-799dc927c62e'),
+      headers: {
+        'Content-type': 'application/json',
+        'Authorization': 'Bearer $accessToken'
+      },
+      body: requestBody
+    );
+    return response;
+  }
+  final responseBody = await DirectusCalls.apiCall(
+    context,
+    checkUpdatesFunc(),
+    'Check Updates',
+    (error) {},
+    showModal: false
+  );
+  return LastUpdate.fromJson(jsonDecode(responseBody) as Map<String, dynamic>);
 }

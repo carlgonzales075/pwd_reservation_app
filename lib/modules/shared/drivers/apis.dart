@@ -11,6 +11,39 @@ import 'package:pwd_reservation_app/modules/shared/drivers/dialogs.dart';
 import 'package:pwd_reservation_app/modules/shared/drivers/errors.dart';
 
 class DirectusCalls {
+  static Future<List<dynamic>> genericGetCollection(
+    BuildContext context, {
+      required String collection,
+      required String fieldQuery,
+      required String filterQuery,
+      required int limitQuery,
+      required int pageQuery
+    }
+  ) async {
+    final String domain = context.read<DomainProvider>().url.toString();
+    final String accessToken = context.read<CredentialsProvider>().accessToken.toString();
+
+    Future<http.Response> genericGetCollectionFunc() async {
+      final response = await http.get(
+        Uri.parse('$domain/items/$collection?fields=$fieldQuery&filter=$filterQuery&limit=$limitQuery&page=$pageQuery'),
+        headers: {
+          'Authorization': 'Bearer $accessToken'
+        }
+      );
+      return response;
+    }
+    final String responseBody = await DirectusCalls.apiCall(
+      context,
+      genericGetCollectionFunc(),
+      'Get Verify Requests',
+      (error) {},
+      showModal: false
+    );
+    final Map<String, dynamic> newResponseBody = jsonDecode(responseBody);
+    final List data = newResponseBody['data'];
+    return data;
+  }
+
   static Future<dynamic> apiCall(
     BuildContext context,
     Future<http.Response> responseFunc,
@@ -67,6 +100,7 @@ class DirectusCalls {
             customErrorFunc,
             autoRefresh,
             showModal,
+            timeout
           );
         }
       }
@@ -89,6 +123,7 @@ class DirectusCalls {
     Function(DirectusErrors)? customErrorFunc,
     bool autoRefresh,
     bool showModal,
+    int timeout
   ) async {
     Map<String, dynamic> responseData = jsonDecode(response.body);
     List<dynamic>? errors = responseData['errors'];
@@ -115,7 +150,8 @@ class DirectusCalls {
             DirectusAuth directusAuth = DirectusAuth(context);
             await directusAuth.refreshToCredentials();
             if (context.mounted) {
-              await apiCall(context, responseFunc, functionName, customErrorFunc);
+              final response = await responseFunc.timeout(Duration(seconds: timeout));
+              return response;
             }
           }
         }
@@ -182,122 +218,6 @@ class DirectusCalls {
 
     return 'failed call';
   }
-
-  // static Future<dynamic> apiCall(BuildContext context,
-  //               Future<http.Response> responseFunc,
-  //               String functionName,
-  //               Function(DirectusErrors)? customErrorFunc,
-  //               {bool autoRefresh=true,
-  //                bool showModal=true,
-  //                int successCode=200,
-  //                int timeout=60,
-  //                String processingTitle='Processing...'
-  //               }) async {
-  //   CustomDialogs customDialogs = CustomDialogs(context);
-    
-  //   try {
-  //     if (showModal) {
-  //       customDialogs.unskippableDialog(
-  //         processingTitle,
-  //         Container(
-  //           padding: const EdgeInsets.all(20.0),
-  //           child: const Column(
-  //             mainAxisSize: MainAxisSize.min,
-  //             children: [
-  //               Center(
-  //                 child: SizedBox(
-  //                   width: 30.0, // Adjust size as needed
-  //                   height: 30.0, // Adjust size as needed
-  //                   child: CircularProgressIndicator(
-  //                     color: CustomThemeColors.themeBlue,
-  //                   ),
-  //                 ),
-  //               ),
-  //               SizedBox(height: 20.0),
-  //               Text('Loading...'),
-  //             ],
-  //           ),
-  //         ),
-  //       );
-  //     }
-  //     final response = await responseFunc.timeout(Duration(seconds: timeout));
-  //     if (context.mounted && showModal) {
-  //       Navigator.pop(context);
-  //     }
-  //     if (response.statusCode == successCode) {
-  //       return response.body;
-  //     } else {
-  //       Map<String, dynamic> responseData = jsonDecode(response.body);
-  //       List<dynamic>? errors = responseData['errors'];
-  //       if (errors != null && errors.isNotEmpty) {
-  //         Map<String, dynamic> error = errors[0];
-  //         String errorMessage = error['message'];
-  //         String errorCode = error['extensions']['code'];
-  //         if ((errorCode == 'TOKEN_EXPIRED') && !autoRefresh) {
-  //           if (context.mounted) {
-  //             Navigator.pop(context);
-  //             customDialogs.customInfoDialog(
-  //               'Login Expired',
-  //               "You're login has expired. Please login again.",
-  //               () {}
-  //             );
-  //           }
-  //         } else if ((errorCode == 'TOKEN_EXPIRED') && autoRefresh) {
-  //           if (context.mounted) {
-  //             await apiCall(context, responseFunc, functionName, customErrorFunc);
-  //           }
-  //         } else {
-  //           if (context.mounted) {
-  //             if (customErrorFunc != null) {
-  //               customErrorFunc(DirectusErrors.fromJson(error));
-  //             } else {
-  //               if (showModal) {
-  //                 Navigator.pop(context);
-  //               }
-  //               customDialogs.customFatalError(
-  //                 errorMessage,
-  //                 () => logError(context, errorCode, errorMessage, '${response.headers}')
-  //               );
-  //             }
-  //           }
-  //         }
-  //       } else {
-  //         if (context.mounted) {
-  //           if (showModal) {
-  //             Navigator.pop(context);
-  //           }
-  //           customDialogs.customFatalError(
-  //             'An unknown error was encoutered.',
-  //             () => logError(context, functionName, 'Directus-based Error: $functionName', '${response.headers}')
-  //           );
-  //         }
-  //       }
-  //       return 'failed call';
-  //     }
-  //   } on TimeoutException {
-  //     if (context.mounted) {
-  //       if (showModal) {
-  //         Navigator.pop(context);
-  //       }
-  //       customDialogs.customErrorDialog(
-  //         'Connection Timeout',
-  //         'Our server is not reachable. \nEnsure good internet connection to proceed.'
-  //       );
-  //     }
-  //     return 'failed call';
-  //   } catch (e) {
-  //     if (context.mounted) {
-  //       if (showModal) {
-  //         Navigator.pop(context);
-  //       }
-  //       customDialogs.customFatalError(
-  //         'An unknown error was encoutered.',
-  //         () => logError(context, functionName, 'Flutter-based Error: $functionName', e.toString())
-  //       );
-  //     }
-  //     return 'failed call';
-  //   }
-  // }
 
   static List<String> getBasics(BuildContext context) {
     final domain = context.read<DomainProvider>().url.toString();

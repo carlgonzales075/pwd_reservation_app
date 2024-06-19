@@ -67,6 +67,43 @@ class CustomDialogs {
     );
   }
 
+  static void advCustomInfoDialog(
+        BuildContext context, Widget? title,
+        Widget? content, VoidCallback? customInfoFunc
+      ) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog.adaptive(
+          title: title,
+          content: Container(
+            constraints: BoxConstraints(
+              minWidth: MediaQuery.of(context).size.width * 0.8, // 80% of screen width
+              maxHeight: MediaQuery.of(context).size.height * 0.8, // 80% of screen height
+            ),
+            child: content
+          ),
+          actions: [
+            ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: CustomThemeColors.themeBlue,
+              foregroundColor: CustomThemeColors.themeWhite,
+              minimumSize: const Size.fromHeight(50)
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+              if (customInfoFunc != null) {
+                customInfoFunc();
+              }
+            },
+            child: const Text('OK')
+          )],
+          actionsAlignment: MainAxisAlignment.center,
+        );
+      }
+    );
+  }
+
   static void customFatalError(BuildContext context, String errorMessage, VoidCallback logErrorFunction) {
     showDialog(
       context: context,

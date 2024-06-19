@@ -111,9 +111,16 @@ class DirectusUser {
       processingTitle: 'Registering...'
     );
     if (context.mounted) {
-      if (response == 'failed call') {
+      if (response != 'failed call') {
         DirectusAuth directusAuth = DirectusAuth(context);
-        await directusAuth.logInToCredentials(email, password);
+        final String userType = await directusAuth.logInToCredentials(email, password);
+        if (context.mounted) {
+          if (userType == 'Passenger') {
+            Navigator.pushReplacementNamed(context, '/home');
+          } else {
+            Navigator.pushReplacementNamed(context, '/employee-home');
+          }
+        }
       }
     }
   }

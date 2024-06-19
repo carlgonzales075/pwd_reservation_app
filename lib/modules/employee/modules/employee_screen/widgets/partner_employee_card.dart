@@ -1,12 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pwd_reservation_app/commons/themes/theme_modules.dart';
-import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
 import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/drivers/partner_employee.dart';
 import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/drivers/vehicle_info_extended.dart';
-import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
 import 'package:pwd_reservation_app/modules/shared/drivers/images.dart';
 import 'package:pwd_reservation_app/modules/users/utils/users.dart';
+
+class PartnerCard extends StatefulWidget {
+  const PartnerCard({
+    super.key,
+  });
+
+  @override
+  State<PartnerCard> createState() => _PartnerCardState();
+}
+
+class _PartnerCardState extends State<PartnerCard> {
+  @override
+  Widget build(BuildContext context) {
+    List<String> employeeRoles = ['Driver', 'Conductor'];
+    String employeeRole = context.read<UserProvider>().role as String;
+    String partnerRole;
+    if (employeeRoles.contains(employeeRole)) {
+      if (employeeRole == 'Driver') {
+        partnerRole = ' Conductor';
+      } else {
+        partnerRole = ' Driver';
+      }
+    } else {
+      partnerRole = '';
+    }
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+        Text(
+          'Partner$partnerRole Info',
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 15,
+            color: CustomThemeColors.themeBlue
+          ),
+        ),
+        const PartnerCardBody(),
+      ])
+    );
+  }
+}
 
 class PartnerCardBody extends StatelessWidget {
   const PartnerCardBody({super.key});
@@ -24,9 +65,7 @@ class PartnerCardBody extends StatelessWidget {
 
     if (partnerId != null) {
       try {
-        final domain = context.read<DomainProvider>().url as String;
-        final accessToken = context.read<CredentialsProvider>().accessToken.toString();
-        final partnerUser = await getPartnerUser(domain, accessToken, partnerId);
+        final partnerUser = await getPartnerUser(context, partnerId);
         return partnerUser;
       } catch (e) {
         return null;

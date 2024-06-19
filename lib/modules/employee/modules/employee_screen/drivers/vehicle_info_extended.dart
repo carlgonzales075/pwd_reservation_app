@@ -1,6 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
+import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
+import 'package:pwd_reservation_app/modules/shared/drivers/apis.dart';
 
 
 class VehicleInfoExtended {
@@ -98,15 +102,18 @@ class VehicleInfoExtendedProvider extends ChangeNotifier {
 }
 
 Future<VehicleInfoExtended> getVehicleInfoExtended(
-  String domain, String accessToken, String vehicleId,
+  BuildContext context, String vehicleId,
   String routeId, String dispatchId
 ) async {
-  final requestBody = jsonEncode({
-    "dispatch_id": dispatchId,
-    "vehicle_id": vehicleId,
-    "route_id": routeId
-  });
-  try {
+  final String domain = context.read<DomainProvider>().url.toString();
+  final String accessToken = context.read<CredentialsProvider>().accessToken.toString();
+  
+  Future<http.Response> getVehicleInfoExtendedFunction() async {
+    final requestBody = jsonEncode({
+      "dispatch_id": dispatchId,
+      "vehicle_id": vehicleId,
+      "route_id": routeId
+    });
     final response = await http.post(
       Uri.parse('$domain/flows/trigger/6502100d-b6f3-4061-9cd7-d2cf9c56ec3f'),
       headers: {
@@ -115,22 +122,14 @@ Future<VehicleInfoExtended> getVehicleInfoExtended(
       },
       body: requestBody
     );
-
-    if (response.statusCode == 200) {
-      return VehicleInfoExtended.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
-    } else {
-      Map<String, dynamic> responseData = jsonDecode(response.body);
-      List<dynamic> errors = responseData['errors'];
-      if (errors.isNotEmpty) {
-        Map<String, dynamic> error = errors[0];
-        String errorMessage = error['message'];
-        String errorCode = error['extensions']['code'];
-        throw Exception('$errorCode: $errorMessage ${response.headers}');
-      } else {
-        throw Exception('Login failed: Unknown error');
-      }
-    }
-  } catch (e) {
-    throw Exception('Uncatched Error: $e');
+    return response;
   }
+  final responseBody = await DirectusCalls.apiCall(
+    context,
+    getVehicleInfoExtendedFunction(),
+    'Get Vehicle Info Extended',
+    (error) {},
+    showModal: false
+  );
+  return VehicleInfoExtended.fromJson(jsonDecode(responseBody) as Map<String, dynamic>);
 }

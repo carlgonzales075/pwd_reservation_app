@@ -49,7 +49,7 @@ class _MapScreenState extends State<MapScreen> {
   Future _establishZoom(GeoPoint point1, GeoPoint point2) async {
     mapController.zoomToBoundingBox(
       BoundingBox.fromGeoPoints([point1, point2]),
-      paddinInPixel: 200
+      paddinInPixel: 300
     );
   }
 
@@ -59,21 +59,19 @@ class _MapScreenState extends State<MapScreen> {
     return GeoPoint(latitude: centerLatitude, longitude: centerLongitude);
   }
 
-  Future<void> _setupMarkerAndZoom(StopsProvider stops) async {
-    await mapController.drawRoad(
-      convertPointToGeoPoint(stops.pickUpPointLocation.toString()),
-      convertPointToGeoPoint(stops.destinationPointLocation.toString()),
+  Future<RoadInfo> _drawRoad(GeoPoint start, GeoPoint end) async {
+    return await mapController.drawRoad(
+      start,
+      end,
       roadType: RoadType.car,
       roadOption: const RoadOption(
         roadColor: CustomThemeColors.themeBlue,
-        roadWidth: 20,
-        roadBorderColor: Colors.amber
-      )
+        roadWidth: 20
+      ),
     );
-    await _establishZoom(
-      convertPointToGeoPoint(stops.destinationPointLocation.toString()),
-      convertPointToGeoPoint(stops.pickUpPointLocation.toString()),
-    );
+  }
+
+  Future<void> _setupMarkerAndZoom(StopsProvider stops) async {
     await _addMarker(
       stops.pickUpPointLocation.toString(),
       stops.stopNamePickUp.toString()
@@ -81,6 +79,14 @@ class _MapScreenState extends State<MapScreen> {
     await _addMarker(
       stops.destinationPointLocation.toString(),
       stops.stopNameDestination.toString()
+    );
+    await _drawRoad(
+      convertPointToGeoPoint(stops.destinationPointLocation.toString()),
+      convertPointToGeoPoint(stops.pickUpPointLocation.toString()),
+    );
+    await _establishZoom(
+      convertPointToGeoPoint(stops.destinationPointLocation.toString()),
+      convertPointToGeoPoint(stops.pickUpPointLocation.toString()),
     );
   }
 

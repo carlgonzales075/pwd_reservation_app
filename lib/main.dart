@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:pwd_reservation_app/modules/auth/auth_modules.dart';
 import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
+import 'package:pwd_reservation_app/modules/employee/modules/dispatch/dispatch.dart';
 import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/drivers/dispatch_info.dart';
 import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/drivers/employee.dart';
 import 'package:pwd_reservation_app/modules/auth/register/register.dart';
@@ -14,6 +15,7 @@ import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/dri
 import 'package:pwd_reservation_app/modules/employee/modules/employee_screen/employee_screen.dart';
 import 'package:pwd_reservation_app/modules/employee/modules/inspect_seats/drivers/last_update.dart';
 import 'package:pwd_reservation_app/modules/employee/modules/inspect_seats/inspect_seats.dart';
+import 'package:pwd_reservation_app/modules/employee/modules/verify/verify.dart';
 import 'package:pwd_reservation_app/modules/home/home_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:pwd_reservation_app/modules/reservation/drivers/passengers.dart';
@@ -98,7 +100,9 @@ class MyApp extends StatelessWidget {
         "/select-bus": (BuildContext context) => const SelectBusScreen(),
         "/domain": (BuildContext context) => const DomainScreen(),
         "/edit-profile": (BuildContext context) => const EditProfileScreen(),
-        "/seats": (BuildContext context) => const InspectSeatsScreen()
+        "/seats": (BuildContext context) => const InspectSeatsScreen(),
+        "/employee-verify": (BuildContext context) => const VerifyPWDScreen(),
+        "/employee-dispatch": (BuildContext context) => const DispatchMenu()
       }
     ); 
   }

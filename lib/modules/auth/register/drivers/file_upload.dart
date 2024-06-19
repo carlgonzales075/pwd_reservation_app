@@ -1,6 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:pwd_reservation_app/commons/themes/theme_modules.dart';
+import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
+import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
+import 'package:pwd_reservation_app/modules/shared/drivers/apis.dart';
+import 'package:pwd_reservation_app/modules/shared/drivers/dialogs.dart';
 import 'package:pwd_reservation_app/modules/users/utils/upload_image.dart';
 
 class DirectusFile {
@@ -30,16 +37,40 @@ class DirectusFileList {
   }
 }
 
-Future<dynamic> uploadImages(String domain, String accessToken, List<File?> selectedImage) async {
+Future<dynamic> uploadImages(BuildContext context, List<File?> selectedImage) async {
   // Filter out null entries (unselected images)
   List<File> selectedFiles = selectedImage.where((image) => image != null).map((image) => image!).toList();
+  final domain = context.read<DomainProvider>().url.toString();
+  final accessToken = context.read<CredentialsProvider>().accessToken.toString();
 
   if (selectedFiles.isEmpty) {
     // No images selected
     throw Exception('No files prepared for upload.');
   }
 
-  // Send images to API endpoint
+  CustomDialogs.unskippableDialog(
+    context,
+    'Uploading Images',
+    Container(
+      padding: const EdgeInsets.all(20.0),
+      child: const Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Center(
+            child: SizedBox(
+              width: 30.0, // Adjust size as needed
+              height: 30.0, // Adjust size as needed
+              child: CircularProgressIndicator(
+                color: CustomThemeColors.themeBlue,
+              ),
+            ),
+          ),
+          SizedBox(height: 20.0),
+          Text('Loading...'),
+        ],
+      ),
+    ),
+  );
   String apiUrl = '$domain/files';
   var request = http.MultipartRequest('POST', Uri.parse(apiUrl));
   request.headers['Authorization'] = 'Bearer $accessToken';
@@ -68,14 +99,18 @@ class IdProcessing {
   }
 }
 
-Future<void> postImageProcessing(String domain, String accessToken, List<String> imageIds, String passengerId) async {
-  Map<String, dynamic> requestBody = {
-    'id_image_front': imageIds[0],
-    'id_image_back': imageIds[1],
-    'id_selfie': imageIds[2],
-    'passenger_id': passengerId,  
-  };
-  try {
+Future<void> postImageProcessing(BuildContext context, List<String> imageIds, String passengerId, String priorityType) async {
+  final domain = context.read<DomainProvider>().url.toString();
+  final accessToken = context.read<CredentialsProvider>().accessToken.toString();
+  
+  Future<http.Response> postImageProcessingFunction() async {
+    Map<String, dynamic> requestBody = {
+      'id_image_front': imageIds[0],
+      'id_image_back': imageIds[1],
+      'id_selfie': imageIds[2],
+      'passenger_id': passengerId,
+      'pwd_sc_info': priorityType 
+    };
     final response = await http.post(
       Uri.parse('$domain/items/id_processing'),
       headers: {
@@ -84,22 +119,14 @@ Future<void> postImageProcessing(String domain, String accessToken, List<String>
       },
       body: json.encode(requestBody)
     );
-    if (response.statusCode == 200) {
-    } else {
-      Map<String, dynamic> responseData = jsonDecode(response.body);
-      List<dynamic> errors = responseData['errors'];
-      if (errors.isNotEmpty) {
-        Map<String, dynamic> error = errors[0];
-        String errorMessage = error['message'];
-        String errorCode = error['extensions']['code'];
-        throw Exception('$errorCode: $errorMessage ${response.headers}');
-      } else {
-        throw Exception('Login failed: Unknown error');
-      }
-    }
-  } catch(e) {
-    throw Exception(e.toString());
+    return response;
   }
+  await DirectusCalls.apiCall(
+    context,
+    postImageProcessingFunction(),
+    'Post ID Processing',
+    (error) {}
+  );
 }
 
 Future<int> checkApplicationProgress(String domain, String accessToken, String passengerId) async {

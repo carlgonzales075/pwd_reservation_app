@@ -111,7 +111,9 @@ class DirectusAuth {
       context,
       refreshFunction(refreshToken),
       'Refresh Login',
-      (errors) {});
+      (errors) {},
+      showModal: false
+    );
     return Credentials.fromJson(jsonDecode(responseBody) as Map<String, dynamic>);
   }
 
@@ -184,6 +186,5 @@ class DirectusAuth {
         expires: credentials.expires
       );
     }
-    throw Exception('Flutter-error: Invalid context provided.');
   }
 }

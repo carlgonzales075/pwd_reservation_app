@@ -3,18 +3,26 @@ import 'package:provider/provider.dart';
 import 'package:pwd_reservation_app/commons/themes/theme_modules.dart';
 import 'package:pwd_reservation_app/modules/reservation/drivers/stops.dart';
 
-class TripSelector extends StatefulWidget {
-  const TripSelector({super.key});
+class TripViewer extends StatefulWidget {
+  const TripViewer({super.key});
 
   @override
-  State<TripSelector> createState() => _TripSelector();
+  State<TripViewer> createState() => _TripViewer();
 }
 
-class _TripSelector extends State<TripSelector> {
+class _TripViewer extends State<TripViewer> {
+  TextEditingController pickupController = TextEditingController();
+  TextEditingController destinationController = TextEditingController();
+  
+  @override
+  void dispose() {
+    super.dispose();
+    pickupController.dispose();
+    destinationController.dispose();
+  }
+
   @override
   Widget build (BuildContext context) {
-    TextEditingController pickupController = TextEditingController();
-    TextEditingController destinationController = TextEditingController();
 
     return Container(
       decoration: const BoxDecoration(
@@ -26,33 +34,21 @@ class _TripSelector extends State<TripSelector> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            const Text(
-              'Where do we go now?',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: CustomThemeColors.themeWhite
-              ),
-            ),
             Consumer<StopsProvider>(
               builder: (context, stops, child) {
                 pickupController.text = stops.stopNamePickUp ?? '';
                 destinationController.text = stops.stopNameDestination ?? '';
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
-                    Visibility(
-                      visible: stops.stopNameDestination != null || stops.stopNamePickUp != null,
-                      child: TripSelectionText(
-                        controller: pickupController,
-                        labelText: 'Where should we pick you up?',
-                        isDestination: false,
-                      ),
+                    TripViewerText(
+                      controller: pickupController,
+                      labelText: 'Pickup'
                     ),
-                    TripSelectionText(
+                    TripViewerText(
                       controller: destinationController,
-                      labelText: 'Where is your destination?',
-                      isDestination: true,
+                      labelText: 'Destination'
                     ),
                   ]
                 );
@@ -65,17 +61,15 @@ class _TripSelector extends State<TripSelector> {
   }
 }
 
-class TripSelectionText extends StatelessWidget {
-  const TripSelectionText({
+class TripViewerText extends StatelessWidget {
+  const TripViewerText({
     super.key,
     required this.labelText,
-    required this.controller,
-    required this.isDestination
+    required this.controller
   });
 
   final String labelText;
   final TextEditingController controller;
-  final bool isDestination;
 
   @override
   Widget build(BuildContext context) {
@@ -88,26 +82,6 @@ class TripSelectionText extends StatelessWidget {
           fontWeight: FontWeight.bold
         ),
         decoration: InputDecoration(
-          suffix: Consumer<StopsProvider>(
-            builder: (context, stops, child) {
-              bool isEnabled;
-              if (isDestination) {
-                isEnabled = stops.destinationId != null;
-              } else {
-                isEnabled = stops.pickUpId != null;
-              }
-              return TextButton(
-                onPressed: isEnabled ? () {
-                  if (isDestination) {
-                    context.read<StopsProvider>().resetDestination();
-                  } else {
-                    context.read<StopsProvider>().resetPickup();
-                  }
-                } : null,
-                child: const Text('Clear'),
-              );
-            }
-          ),
           filled: true,
           fillColor: CustomThemeColors.themeWhite,
           border: OutlineInputBorder(

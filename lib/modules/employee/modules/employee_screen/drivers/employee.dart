@@ -2,6 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:pwd_reservation_app/modules/auth/drivers/auth.dart';
+import 'package:pwd_reservation_app/modules/shared/config/env_config.dart';
+import 'package:pwd_reservation_app/modules/shared/drivers/apis.dart';
 
 class Employee {
   String id;
@@ -67,8 +71,11 @@ class EmployeeProvider extends ChangeNotifier {
   }
 }
 
-Future<Employee> getEmployeeInfo(String domain, String accessToken, String userId) async {
-  try {
+Future<Employee> getEmployeeInfo(BuildContext context, String userId) async {
+  final String domain = context.read<DomainProvider>().url.toString();
+  final String accessToken = context.read<CredentialsProvider>().accessToken.toString();
+  
+  Future<http.Response> getEmployeeInfoFunc() async {
     final response = await http.post(
       Uri.parse(
         '$domain/flows/trigger/4d9c603e-8185-4928-9ed3-838a35f678cd'
@@ -81,21 +88,14 @@ Future<Employee> getEmployeeInfo(String domain, String accessToken, String userI
         {"user_id": userId}
       )
     );
-    if (response.statusCode == 200) {
-      return Employee.fromJson(jsonDecode(response.body) as List<dynamic>);
-    } else {
-      Map<String, dynamic> responseData = jsonDecode(response.body);
-      List<dynamic> errors = responseData['errors'];
-      if (errors.isNotEmpty) {
-        Map<String, dynamic> error = errors[0];
-        String errorMessage = error['message'];
-        String errorCode = error['extensions']['code'];
-        throw Exception('$errorCode: $errorMessage ${response.headers}');
-      } else {
-        throw Exception('Login failed: Unknown error');
-      }
-    }
-  } catch (e) {
-    throw Exception(e.toString());
+    return response;
   }
+  final responseBody = await DirectusCalls.apiCall(
+    context,
+    getEmployeeInfoFunc(),
+    'Get Employee Info',
+    (error) {},
+    showModal: false
+  );
+  return Employee.fromJson(jsonDecode(responseBody) as List<dynamic>);
 }
